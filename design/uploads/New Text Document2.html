@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד יישובי גליל מזרחי</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom Scrollbar for Table */
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .tab-active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            color: #64748b;
+        }
+        .tab-inactive:hover {
+            color: #334155;
+        }
+        .btn-toggle-active {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #4f46e5; /* indigo-600 */
+            font-weight: 700;
+        }
+        .btn-toggle-inactive {
+            color: #64748b;
+        }
+        .btn-toggle-inactive:hover {
+            color: #334155;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <script>
+        // --- 1. Settlement Data (Raw) ---
+        const settlementsData = [
+  // --- INDEPENDENT AUTHORITIES ---
+  {
+    "name": "קריית שמונה", 
+    "authority": "קריית שמונה", 
+    "sector": "יהודי", 
+    "sector_detailed": "יהודי", 
+    "type_gross": "עירייה", 
+    "type_detailed": "עירייה", 
+    "population": 23719, 
+    "wage": 9374, 
+    "socio_rank": 5, 
+    "haredi_pct": 2.1, 
+    "ages": {
+        "m":[850,910,950,980,820,780,750,710,680,650,620,580,550,1100], 
+        "f":[810,880,920,960,800,760,740,700,670,640,610,570,540,1250]
+    } 
+  },{"name": "מטולה", "authority": "מטולה", "sector": "יהודי", "sector_detailed": "יהודי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 2161, "wage": 10686, "socio_rank": 7, "haredi_pct": 0, "ages": {"m":[55,36,45,51,80,223,116,79,61,50,42,48,31,127],"f":[54,42,39,45,121,281,92,57,42,51,51,40,58,144]}},
+  {"name": "קצרין", "authority": "קצרין", "sector": "יהודי", "sector_detailed": "יהודי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 7956, "wage": 8746, "socio_rank": 5, "haredi_pct": 2.7, "ages": {"m":[300,351,363,372,255,232,235,271,245,242,232,198,206,563],"f":[255,284,334,302,201,202,211,237,257,244,255,225,210,671]}},
+  {"name": "חצור הגלילית", "authority": "חצור הגלילית", "sector": "יהודי", "sector_detailed": "יהודי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 10979, "wage": 8664, "socio_rank": 4, "haredi_pct": 25.6, "ages": {"m":[170,147,102,171,92,56,40,26,28,32,22,16,7,25],"f":[162,137,85,89,60,58,55,35,23,23,20,13,6,17]}},
+  {"name": "ראש פינה", "authority": "ראש פינה", "sector": "יהודי", "sector_detailed": "יהודי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 3371, "wage": 11259, "socio_rank": 7, "haredi_pct": 0, "ages": {"m":[92,116,130,127,146,134,104,70,87,97,93,82,75,270],"f":[102,132,139,152,109,106,90,83,115,113,113,88,96,311]}},
+  {"name": "צפת", "authority": "צפת", "sector": "יהודי", "sector_detailed": "יהודי", "type_gross": "עירייה", "type_detailed": "עירייה", "population": 38717, "wage": 7807, "socio_rank": 2, "haredi_pct": 53.7, "ages": {"m":[329,287,292,511,195,142,100,89,72,81,75,92,109,258],"f":[286,263,243,270,218,118,118,104,77,76,82,65,99,269]}},
+  {"name": "יסוד המעלה", "authority": "יסוד המעלה", "sector": "יהודי", "sector_detailed": "יהודי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 1980, "wage": 12681, "socio_rank": 7, "haredi_pct": 0, "ages": {"m":[73,58,81,83,62,81,109,80,62,56,61,55,43,121],"f":[61,75,69,79,86,60,48,48,49,74,78,76,36,115]}},
+  {"name": "מג'דל שמס", "authority": "מג'דל שמס", "sector": "דרוזי", "sector_detailed": "דרוזי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 11220, "wage": 7974, "socio_rank": 3, "haredi_pct": 0, "ages": {"m":[353,461,505,525,520,481,477,361,399,409,449,318,206,396],"f":[316,378,453,484,368,420,397,362,408,451,436,256,195,435]}},
+  {"name": "מסעדה", "authority": "מסעדה", "sector": "דרוזי", "sector_detailed": "דרוזי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 4184, "wage": 7561, "socio_rank": 3, "haredi_pct": 0, "ages": {"m":[150,190,210,215,120,117,84,126,150,170,161,88,65,134],"f":[169,189,236,220,209,174,159,167,138,152,125,82,61,123]}},
+  {"name": "בוקעאתא", "authority": "בוקעאתא", "sector": "דרוזי", "sector_detailed": "דרוזי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 6886, "wage": 7887, "socio_rank": 3, "haredi_pct": 0, "ages": {"m":[218,296,325,350,348,310,255,267,247,237,244,145,117,240],"f":[246,231,275,298,259,283,283,238,220,244,217,157,108,230]}},
+  {"name": "עין קנייא", "authority": "עין קנייא", "sector": "דרוזי", "sector_detailed": "דרוזי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 2444, "wage": 8066, "socio_rank": 3, "haredi_pct": 0, "ages": {"m":[123,107,122,136,96,92,71,90,99,113,91,76,29,55],"f":[85,91,108,95,90,105,95,77,89,81,71,44,33,78]}},
+  {"name": "ג'ש (גוש חלב)", "authority": "ג'ש (גוש חלב)", "sector": "ערבי", "sector_detailed": "נוצרי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 3190, "wage": 11077, "socio_rank": 7, "haredi_pct": 0, "ages": {"m":[90,84,101,113,99,115,105,77,115,128,124,130,83,169],"f":[122,121,120,123,78,131,132,81,115,104,94,98,104,232]}},
+  {"name": "טובא-זנגרייה", "authority": "טובא-זנגרייה", "sector": "ערבי", "sector_detailed": "בדואי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 7113, "wage": 8041, "socio_rank": 3, "haredi_pct": 0, "ages": {"m":[402,378,315,363,238,286,274,317,224,227,176,122,50,74],"f":[410,447,395,393,314,333,311,274,206,169,140,133,52,90]}},
+  {"name": "ע'ג'ר", "authority": "ע'ג'ר", "sector": "ערבי", "sector_detailed": "עלווי", "type_gross": "מועצה מקומית", "type_detailed": "מועצה מקומית", "population": 2691, "wage": 8969, "socio_rank": 3, "haredi_pctדד": 0, "ages": {"m":[118,110,127,123,103,136,88,114,106,86,56,39,34,55],"f":[128,135,141,141,126,129,105,101,92,72,58,36,55,74]}},
+  // --- Mevo'ot HaHermon Settlements ---
+  {"name":"יובל","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":841,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[24,20,30,30,29,62,46,23,19,22,17,16,12,58],"f":[25,21,28,24,64,77,27,12,17,23,20,21,22,54]}},
+  {"name":"מרגליות","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":454,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[14,14,12,11,40,42,22,15,4,8,9,14,25,26],"f":[13,5,8,9,29,23,13,11,8,6,10,16,9,36]}},
+  {"name":"כורזים","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":484,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[25,6,6,15,21,28,22,21,14,10,11,18,17,52],"f":[15,9,14,14,10,8,9,8,16,5,9,19,12,69]}},
+  {"name":"אליפלט","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":777,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[32,52,36,26,29,29,34,35,26,20,14,18,22,42],"f":[33,42,26,21,14,25,29,32,20,27,13,9,29,43]}},
+  {"name":"אמנון","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":528,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[38,22,21,17,7,5,16,20,37,14,11,19,6,40],"f":[17,32,13,15,16,14,21,30,13,14,16,9,18,27]}},
+  {"name":"בית הלל","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":1104,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[29,36,17,37,39,110,91,28,28,32,20,9,13,48],"f":[36,35,31,30,35,144,83,39,23,24,21,10,8,47]}},
+  {"name":"דישון","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":392,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[20,10,5,10,16,25,22,17,12,4,4,13,18,34],"f":[14,15,9,13,6,12,11,13,7,8,9,10,15,41]}},
+  {"name":"כחל","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":512,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[24,25,25,14,11,13,11,20,25,16,7,8,12,47],"f":[20,29,31,15,4,5,17,30,19,9,7,10,21,38]}},
+  {"name":"כרכום","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי","population":494,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[12,10,14,19,18,16,15,11,13,7,8,25,40,38],"f":[19,12,16,6,10,14,9,13,10,5,20,31,42,41]}},
+  {"name":"משמר הירדן","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":944,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[32,45,36,38,22,28,43,40,43,32,18,16,21,72],"f":[43,41,37,34,27,21,33,32,43,32,18,25,20,55]}},
+  {"name":"רמות נפתלי","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":490,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[7,14,14,22,21,25,18,12,16,14,21,23,11,37],"f":[12,11,21,32,10,16,16,9,11,12,24,18,5,39]}},
+  {"name":"שאר ישוב","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":797,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[17,22,24,15,42,76,73,32,14,17,17,9,8,43],"f":[17,15,20,15,31,116,52,23,7,12,15,8,11,44]}},
+  {"name":"שדה אליעזר","authority":"מבואות החרמון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":1033,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[46,40,47,41,31,21,37,33,29,37,34,41,31,57],"f":[41,42,59,41,20,19,31,31,32,40,39,27,20,65]}},
+  // --- Galil Elyon Settlements ---
+  {"name":"יפתח","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":634,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[23,29,31,21,7,11,15,24,31,26,18,16,8,50],"f":[19,37,28,27,7,8,12,22,28,31,20,15,14,56]}},
+  {"name":"להבות הבשן","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":896,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[26,32,34,47,47,35,17,21,26,28,33,22,23,66],"f":[14,30,39,34,25,16,22,22,25,38,32,23,26,90]}},
+  {"name":"איילת השחר","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":1142,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[43,44,66,57,22,16,29,47,38,47,53,20,14,96],"f":[26,30,43,40,14,20,29,34,55,38,54,30,18,117]}},
+  {"name":"ברעם","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":705,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[19,23,24,32,21,14,29,39,19,16,28,15,23,73],"f":[22,27,20,22,11,8,21,26,21,25,24,21,15,71]}},
+  {"name":"צבעון","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":455,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[21,45,34,16,5,5,15,23,30,20,10,10,7,9],"f":[21,32,19,16,9,8,9,38,19,11,11,6,0,5]}},
+  {"name":"גדות","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":474,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[29,35,19,14,8,9,12,15,17,15,11,7,6,37],"f":[16,33,22,15,0,11,10,24,16,14,8,10,7,50]}},
+  {"name":"גונן","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":409,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[16,18,25,23,8,7,6,6,16,17,12,11,0,37],"f":[10,10,15,14,4,4,6,14,19,22,23,12,4,46]}},
+  {"name":"דן","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":837,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[47,45,38,20,16,25,37,41,27,31,12,13,5,59],"f":[31,44,35,14,23,34,41,42,46,28,10,11,8,54]}},
+  {"name":"דפנה","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":1029,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[45,51,33,40,30,38,26,41,48,37,34,20,7,64],"f":[35,58,55,34,31,36,29,37,28,41,22,11,12,86]}},
+  {"name":"הגושרים","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":1254,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[55,65,42,29,20,52,62,70,40,34,21,24,30,65],"f":[44,55,37,21,33,82,55,62,52,41,30,23,33,79]}},
+  {"name":"חולתה","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":739,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[44,46,37,21,12,16,25,30,33,19,17,10,11,45],"f":[34,46,38,20,4,10,28,36,43,28,17,13,8,48]}},
+  {"name":"יראון","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":401,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[14,19,20,16,12,12,14,16,8,9,5,4,7,44],"f":[14,16,10,10,16,13,9,15,9,11,6,11,11,51]}},
+  {"name":"כפר בלום","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":945,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[35,41,59,27,30,25,16,31,26,41,33,15,9,75],"f":[30,40,43,44,23,8,21,47,38,43,32,16,12,86]}},
+  {"name":"כפר גלעדי","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":799,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[16,23,29,13,31,55,33,30,27,18,20,21,13,53],"f":[21,28,16,21,55,64,16,20,25,25,22,25,6,73]}},
+  {"name":"כפר הנשיא","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":812,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[33,38,31,38,13,15,25,23,27,23,17,13,18,84],"f":[22,35,23,31,9,7,19,25,33,24,14,21,18,132]}},
+  {"name":"כפר סאלד","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":752,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[28,49,26,18,12,13,27,39,40,37,17,11,9,43],"f":[47,42,28,24,11,14,24,39,30,23,14,8,15,64]}},
+  {"name":"מחניים","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":864,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[27,44,47,35,20,21,25,38,28,25,18,15,13,56],"f":[18,40,56,48,16,11,23,41,32,38,26,19,14,70]}},
+  {"name":"מנרה","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":318,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[20,14,7,0,7,22,16,36,14,5,4,7,5,21],"f":[14,18,6,4,0,12,15,21,8,0,0,0,5,24]}},
+  {"name":"מעיין ברוך","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":853,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[26,47,30,23,20,66,37,32,30,17,16,14,13,51],"f":[28,33,23,13,44,82,40,32,29,17,23,11,12,47]}},
+  {"name":"משגב עם","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":398,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[16,12,11,12,19,26,29,22,10,9,6,9,6,15],"f":[25,18,12,7,18,18,28,24,6,8,6,9,7,15]}},
+  {"name":"נאות מרדכי","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":745,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[38,46,31,25,6,8,31,32,32,15,18,7,10,54],"f":[44,33,30,12,16,37,33,32,33,24,13,8,14,62]}},
+  {"name":"סאסא","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":425,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[14,19,8,9,15,8,11,21,13,10,18,7,19,54],"f":[14,13,11,13,7,9,9,9,12,14,12,14,7,53]}},
+  {"name":"עמיעד","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":597,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[25,46,25,11,18,14,19,20,23,20,15,13,7,47],"f":[33,29,17,17,12,7,19,25,29,20,15,14,16,45]}},
+  {"name":"עמיר","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":690,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[20,50,30,23,21,24,24,30,22,19,17,18,7,61],"f":[23,30,15,17,19,16,19,44,21,22,25,16,9,48]}},
+  {"name":"קדרים","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":329,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[18,27,17,5,6,9,12,17,14,5,5,8,13,0],"f":[20,23,13,17,9,14,12,21,10,6,7,12,7,0]}},
+  {"name":"שדה נחמיה","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":1167,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[28,53,59,40,52,37,34,34,24,54,37,33,21,51],"f":[37,49,65,63,39,30,41,36,47,50,47,29,20,56]}},
+  {"name":"שמיר","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":828,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[25,26,31,35,23,23,17,22,28,23,29,32,16,57],"f":[31,34,37,28,38,26,18,27,24,33,25,30,22,66]}},
+  {"name":"שניר","authority":"הגליל העליון","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":753,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[35,40,26,32,30,17,24,27,25,32,19,16,15,40],"f":[34,43,40,23,18,18,21,32,25,28,22,16,17,37]}},
+  // --- Golan Settlements ---
+  {"name":"אל-רום","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":546,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[27,34,42,19,9,15,21,27,27,18,16,11,14,31],"f":[24,23,20,18,5,7,18,27,18,17,8,11,14,26]}},
+  {"name":"נאות גולן","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":740,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[21,35,33,38,16,20,11,20,38,42,23,18,9,32],"f":[35,55,47,31,12,8,15,25,43,28,25,9,8,45]}},
+  {"name":"אבני איתן","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":1023,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[76,79,66,38,17,35,51,54,43,18,7,5,11,33],"f":[73,83,64,48,30,18,38,40,35,13,9,6,11,21]}},
+  {"name":"אודם","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":  "מושב","type_detailed":"מושב שיתופי","population":292,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[20,35,7,0,0,0,9,28,18,0,0,0,0,17],"f":[25,17,10,7,8,11,11,20,10,7,0,0,4,13]}},
+  {"name":"אורטל","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":366,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[17,26,21,10,12,13,14,14,15,21,6,5,8,7],"f":[16,25,22,16,4,5,5,20,13,18,10,13,7,4]}},
+  {"name":"אלוני הבשן","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב שיתופי (דתי)","population":492,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[33,30,42,30,12,7,18,15,20,13,0,11,7,6],"f":[30,39,38,32,10,10,15,18,16,15,6,10,4,0]}},
+  {"name":"אניעם","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":487,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[13,11,21,17,18,11,16,10,10,14,19,18,24,39],"f":[11,10,16,22,31,24,10,11,11,14,22,18,10,37]}},
+  {"name":"אפיק","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":393,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[18,32,23,12,9,9,12,16,20,14,6,6,7,24],"f":[19,25,18,12,5,5,10,15,20,15,4,7,10,21]}},
+  {"name":"בני יהודה","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי","population":1258,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[33,47,56,46,35,24,15,19,47,51,41,29,36,103],"f":[38,61,71,60,39,27,21,37,53,45,41,42,40,103]}},
+  {"name":"גבעת יואב","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":763,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[31,39,41,30,11,27,21,28,27,40,25,12,6,43],"f":[30,41,40,45,14,11,13,21,42,39,23,8,0,54]}},
+  {"name":"גשור","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":323,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[10,19,14,14,4,7,7,13,10,10,12,13,9,15],"f":[14,17,16,16,5,7,7,17,12,8,16,9,9,9]}},
+  {"name":"חד נס","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי","population":910,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[25,44,41,35,51,30,18,29,24,28,41,48,28,54],"f":[23,25,34,31,21,23,15,26,24,38,52,43,23,37]}},
+  {"name":"חספין","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי (דתי)","population":1938,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[96,113,119,346,150,48,50,38,34,36,20,31,17,44],"f":[91,103,116,109,54,44,44,47,33,50,29,26,13,36]}},
+  {"name":"יונתן","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב שיתופי (דתי)","population":855,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[43,65,57,40,19,14,17,35,34,24,13,14,9,29],"f":[63,65,64,54,19,21,18,30,34,15,19,10,9,20]}},
+  {"name":"כנף","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":512,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[24,18,28,22,26,20,25,13,12,18,14,20,29,0],"f":[19,16,28,26,18,16,28,8,15,14,19,19,14,0]}},
+  {"name":"כפר חרוב","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":520,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[26,29,22,24,12,14,13,21,18,14,13,13,14,29],"f":[16,39,22,14,7,10,11,24,17,16,16,20,16,29]}},
+  {"name":"מבוא חמה","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":530,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[25,29,27,13,11,13,11,23,28,13,13,8,5,41],"f":[27,24,35,7,10,10,8,29,33,18,5,10,11,42]}},
+  {"name":"מיצר","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":355,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[26,24,17,39,0,0,13,16,10,11,4,6,0,0],"f":[21,36,12,49,5,0,14,25,10,5,0,4,0,0]}},
+  {"name":"מעלה גמלא","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":652,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[36,36,52,21,7,22,29,26,30,34,6,12,5,39],"f":[35,42,24,16,10,10,19,27,28,18,9,11,8,42]}},
+  {"name":"מרום גולן","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":789,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[23,40,45,42,16,15,16,22,29,25,27,33,23,48],"f":[27,35,32,39,14,9,16,23,26,32,37,21,19,51]}},
+  {"name":"נוב","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":1153,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[78,84,81,58,26,27,43,37,41,35,17,6,11,61],"f":[39,76,81,53,34,19,41,37,51,42,12,10,10,43]}},
+  {"name":"נווה אטי\"ב","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":227,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[10,15,14,6,0,7,5,15,5,7,6,0,0,24],"f":[8,12,6,8,6,0,4,15,11,4,5,0,5,20]}},
+  {"name":"נטור","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":751,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[29,47,55,88,17,14,19,26,26,31,11,4,8,5],"f":[34,46,53,77,24,14,18,20,32,26,14,6,4,0]}},
+  {"name":"עין זיוון","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":543,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[27,39,28,22,14,20,11,24,30,19,16,5,10,20],"f":[16,42,26,12,17,11,8,30,27,23,10,10,7,19]}},
+  {"name":"קדמת צבי","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":682,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[35,55,30,18,15,20,26,33,38,20,11,7,11,32],"f":[48,43,12,15,25,13,27,39,27,14,10,19,18,21]}},
+  {"name":"קלע אלון","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי","population":411,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[20,22,30,25,9,8,5,13,16,18,20,12,7,15],"f":[19,21,22,10,19,0,11,14,21,16,12,10,0,13]}},
+  {"name":"קשת","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב שיתופי (דתי)","population":961,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[56,72,59,162,18,15,20,19,34,17,13,6,10,34],"f":[59,68,75,48,8,11,22,28,29,19,10,6,17,27]}},
+  {"name":"רמות","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":848,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[34,24,36,31,34,33,31,38,34,44,21,14,0,56],"f":[21,51,38,36,32,23,17,35,32,29,24,12,6,57]}},
+  {"name":"רמת מגשימים","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב שיתופי (דתי)","population":804,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[37,65,48,38,19,13,16,30,24,20,13,16,10,44],"f":[40,49,69,53,18,12,19,22,24,23,12,19,11,39]}},
+  {"name":"שעל","authority":"גולן","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":435,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[19,29,18,8,9,16,17,27,26,11,7,4,7,29],"f":[25,29,20,8,0,8,15,31,15,8,0,7,8,28]}},
+
+  // --- Merom HaGalil ---
+  {"name":"פרוד","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"קיבוץ","type_detailed":"קיבוץ","population":652,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[24,41,38,21,4,9,13,21,31,23,16,7,20,49],"f":[32,55,32,20,0,4,18,28,28,19,11,8,24,54]}},
+  {"name":"כפר חושן (ספסופה)","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":911,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[39,50,53,36,31,38,26,18,24,27,29,28,34,42],"f":[28,39,39,30,36,29,26,25,30,40,28,30,19,36]}},
+  {"name":"עין אל-אסד","authority":"מרום הגליל","sector":"דרוזי","sector_detailed":"דרוזי","type_gross":"יישוב כפרי","type_detailed":"יישוב כפרי","population":937,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[37,32,43,52,44,32,41,25,27,26,26,19,19,45],"f":[23,25,32,34,35,45,38,39,24,37,22,29,29,57]}},
+  {"name":"ריחאניה","authority":"מרום הגליל","sector":"ערבי","sector_detailed":"צ'רקסי","type_gross":"יישוב כפרי","type_detailed":"יישוב כפרי","population":1175,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[49,55,51,37,49,55,43,28,54,41,39,34,36,65],"f":[42,38,38,34,23,30,48,46,43,45,48,27,21,55]}},
+  {"name":"אביבים","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":496,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[15,16,22,17,27,32,19,19,14,15,15,17,6,22],"f":[18,19,25,22,25,15,10,18,14,21,10,6,7,30]}},
+  {"name":"אור הגנוז","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי (דתי)","population":693,"wage":0,"socio_rank":0,"haredi_pct":90.5,"ages":{"m":[41,40,55,40,37,19,14,6,16,25,27,17,13,4],"f":[46,50,49,66,22,6,5,8,19,23,19,16,8,0]}},
+  {"name":"אמירים","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":791,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[22,33,38,40,21,6,16,28,21,32,28,15,14,46],"f":[31,37,43,44,32,12,15,24,40,35,39,14,23,41]}},
+  {"name":"בר יוחאי","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי (דתי)","population":1151,"wage":0,"socio_rank":0,"haredi_pct":21.8,"ages":{"m":[62,64,83,67,65,45,24,33,21,30,39,24,17,19],"f":[56,61,76,82,53,30,26,33,20,39,35,21,11,16]}},
+  {"name":"דוב\"ב","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":481,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[11,13,11,12,21,25,14,8,23,14,24,14,19,27],"f":[21,15,25,20,12,12,11,13,22,14,18,20,10,32]}},
+  {"name":"דלתון","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":982,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[51,40,41,50,29,33,41,29,21,23,23,39,35,40],"f":[52,45,43,40,50,39,35,19,23,26,20,30,18,46]}},
+  {"name":"חזון","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":346,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[18,14,13,7,6,6,12,13,13,11,4,0,6,49],"f":[10,19,12,10,16,5,9,15,7,7,4,4,4,52]}},
+  {"name":"טפחות","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":528,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[32,29,37,87,26,14,16,20,13,11,9,5,0,17],"f":[28,20,29,23,13,14,16,17,12,9,4,4,8,10]}},
+  {"name":"כפר חנניה","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי","population":793,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[46,37,54,52,19,13,18,20,20,30,28,27,26,30],"f":[28,32,30,37,24,20,22,25,28,21,30,26,20,31]}},
+  {"name":"כפר שמאי","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":625,"wage":0,"socio_rank":0,"haredi_pct":32.4,"ages":{"m":[41,40,53,24,11,11,16,24,18,30,13,14,9,33],"f":[21,36,40,31,11,9,14,28,20,19,6,10,17,26]}},
+  {"name":"כרם בן זמרה","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":613,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[28,30,33,21,15,33,40,33,12,13,12,13,15,29],"f":[25,31,27,16,24,29,20,18,16,14,8,18,14,28]}},
+  {"name":"מירון","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":683,"wage":0,"socio_rank":0,"haredi_pct":63.6,"ages":{"m":[41,38,38,31,22,25,23,16,14,21,11,14,9,39],"f":[53,39,39,38,22,16,17,16,16,15,16,5,9,42]}},
+  {"name":"עלמה","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":857,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[32,29,36,38,39,41,34,30,22,18,33,20,20,29],"f":[42,46,42,46,46,33,38,20,22,20,16,21,7,37]}},
+  {"name":"עמוקה","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"יישוב קהילתי","type_detailed":"יישוב קהילתי","population":157,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[6,4,5,0,0,0,12,6,6,0,0,0,10,30],"f":[5,4,0,0,0,0,15,6,0,0,0,0,7,23]}},
+  {"name":"שזור","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":384,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[17,14,9,5,24,16,13,7,13,8,14,9,16,44],"f":[8,11,6,10,18,14,12,7,11,9,13,8,16,31]}},
+  {"name":"שפר","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב","population":503,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[23,37,21,12,18,8,13,16,20,10,12,9,20,37],"f":[25,24,29,13,15,13,12,12,13,13,11,11,18,39]}},
+  {"name":"כלנית","authority":"מרום הגליל","sector":"יהודי","sector_detailed":"יהודי","type_gross":"מושב","type_detailed":"מושב (דתי)","population":310,"wage":0,"socio_rank":0,"haredi_pct":0,"ages":{"m":[23,22,14,7,12,13,14,15,10,0,0,6,0,29],"f":[20,17,8,4,10,14,14,14,6,0,0,8,14,12]}}
+];
+
+        // --- 2. Authorities Data (Aggregated/Specific) ---
+        // 14 Independent Authorities + 4 Regional Councils
+        // Haredi % for RCs calculated as weighted average from settlements
+        // RC Wage/Rank data from previous context
+        const authoritiesData = [
+            ...settlementsData.filter(d => ['עירייה', 'מועצה מקומית'].includes(d.type_gross)), // The 14 Independent
+            { "name": "מבואות החרמון", "authority": "מבואות החרמון","sector":"יהודי", "type_gross": "מועצה אזורית", "population": 7200, "wage": 11658, "socio_rank": 7, "haredi_pct": 0 },
+            { "name": "הגליל העליון", "authority": "הגליל העליון","sector":"יהודי", "type_gross": "מועצה אזורית", "population": 20500, "wage": 11913, "socio_rank": 7, "haredi_pct": 0 },
+            { "name": "גולן", "authority": "גולן", "type_gross": "מועצה אזורית","sector":"יהודי", "population": 19000, "wage": 10967, "socio_rank": 6, "haredi_pct": 0 },
+            // Merom HaGalil Haredi Calculation: Weighted Average (simplified approximation based on settlements)
+            { "name": "מרום הגליל", "authority": "מרום הגליל","sector":"יהודי", "type_gross": "מועצה אזורית", "population": 15500, "wage": 10056, "socio_rank": 5, "haredi_pct": 22.5 }
+        ];
+
+        // Unified reference for specific uses
+        const rawData = settlementsData; // Keeping backward compatibility for demographic charts
+    </script>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 flex-grow">
+        
+        <header class="bg-white rounded-xl shadow-sm p-6 border-r-4 border-blue-600 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800">דשבורד התיישבות גליל מזרחי</h1>
+                <p class="text-slate-500 mt-1">מערכת ניתוח דמוגרפי וכלכלי</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg text-center min-w-[140px] card-hover">
+                    <span class="block text-sm text-blue-600 font-semibold">סה"כ אוכלוסייה</span>
+                    <span id="kpi-total-pop" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-lg text-center min-w-[140px] card-hover">
+                    <span class="block text-sm text-indigo-600 font-semibold">מספר יישובים</span>
+                    <span id="kpi-total-settlements" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <section class="lg:col-span-8 bg-white rounded-xl shadow-sm p-6">
+                <div class="flex flex-col md:flex-row h-full gap-6">
+                    <div class="w-full md:w-1/4 space-y-4 border-l pl-4 border-slate-100">
+                        <h3 class="font-bold text-lg text-slate-700 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            דמוגרפיה
+                        </h3>
+                        
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-500">רשות מוניציפלית</label>
+                            <select id="filter-authority" class="w-full border border-slate-200 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                                <option value="all">כל הרשויות</option>
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-500">מגזר</label>
+                            <select id="filter-sector" class="w-full border border-slate-200 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                                <option value="all">כל המגזרים</option>
+                                <option value="יהודי">יהודי</option>
+                                <option value="ערבי">ערבי</option>
+                                <option value="דרוזי">דרוזי</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-semibold text-slate-500">צורת יישוב</label>
+                            <select id="filter-type" class="w-full border border-slate-200 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                                <option value="all">כל הצורות</option>
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-1 pt-2 border-t border-slate-100">
+                            <label class="text-xs font-semibold text-slate-500">יישוב ספציפי</label>
+                            <select id="filter-settlement" class="w-full border border-slate-200 rounded p-2 text-sm focus:border-blue-500 outline-none bg-blue-50/50">
+                                <option value="all">כל היישובים</option>
+                            </select>
+                        </div>
+	
+                        <button id="reset-demo-filters" class="text-xs text-blue-600 hover:underline mt-2">איפוס סינונים</button>
+                    </div>
+
+                    <div class="w-full md:w-3/4 flex flex-col">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-semibold text-slate-700">פירמידת גילים ומגדר</h4>
+                            <span id="demo-mode-badge" class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">מצב השוואה</span>
+                        </div>
+                        <div class="relative flex-grow min-h-[350px]">
+                            <canvas id="pyramidChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lg:col-span-4 space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 border-t-4 border-purple-500 card-hover h-[300px] flex flex-col">
+                    <div class="flex flex-col gap-2 mb-2">
+                        <h3 class="font-bold text-slate-700 leading-tight">רשויות ויישובים עם אוכלוסייה חרדית</h3>
+                        <div class="flex justify-between items-center">
+                            <div class="flex bg-gray-100 rounded p-0.5 text-[10px]">
+                                <button onclick="updateHarediChart('authorities', currentHarediMetric)" id="btn-haredi-auth" class="px-2 py-1 rounded bg-white shadow text-purple-700 font-bold transition">מועצות</button>
+                                <button onclick="updateHarediChart('settlements', currentHarediMetric)" id="btn-haredi-set" class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition">יישובים</button>
+                            </div>
+                            <div class="flex bg-gray-100 rounded p-0.5 text-[10px]">
+                                <button onclick="updateHarediChart(currentHarediScope, 'pct')" id="btn-haredi-pct" class="px-2 py-1 rounded bg-white shadow text-purple-700 font-bold transition">%</button>
+                                <button onclick="updateHarediChart(currentHarediScope, 'abs')" id="btn-haredi-abs" class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition">מספר</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative flex-grow w-full">
+                        <canvas id="harediChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6 relative card-hover h-[300px] flex flex-col">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-slate-700">פילוח יישובים</h3>
+                        <div class="flex bg-gray-100 rounded p-0.5 text-[10px]">
+                            <button onclick="toggleTypeChart('gross')" id="btn-type-gross" class="px-2 py-1 rounded bg-white shadow text-blue-700 font-medium transition">כללי</button>
+                            <button onclick="toggleTypeChart('detailed')" id="btn-type-detailed" class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition">מפורט</button>
+                        </div>
+                    </div>
+                    <div class="relative flex-grow w-full flex justify-center items-center">
+                        <canvas id="typesChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-400 mt-1">לחץ להצגת רשימה</p>
+                </div>
+
+            </section>
+
+            <section class="lg:col-span-12 bg-white rounded-xl shadow-sm p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                            <span class="w-1.5 h-6 bg-green-500 rounded-sm"></span>
+                            מדד סוציו-אקונומי לפי רשות
+                        </h3>
+                        <div class="h-60">
+                            <canvas id="socioRankChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                            <span class="w-1.5 h-6 bg-emerald-600 rounded-sm"></span>
+                            שכר ממוצע לפי רשות
+                        </h3>
+                        <div class="h-60">
+                            <canvas id="wageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+
+
+            <section class="lg:col-span-12 bg-white rounded-xl shadow-sm overflow-hidden flex flex-col max-h-[600px]">
+                <div class="p-4 border-b flex flex-col md:flex-row justify-between items-center bg-gray-50 gap-4">
+                    <div class="flex gap-4">
+                        <button onclick="switchTable('authorities')" id="tab-auth" class="text-sm font-medium tab-active transition pb-1">טבלת רשויות</button>
+                        <button onclick="switchTable('settlements')" id="tab-set" class="text-sm font-medium tab-inactive transition pb-1">כל היישובים</button>
+                        <button onclick="switchTable('haredi')" id="tab-haredi" class="text-sm font-medium tab-inactive transition pb-1">יישובים עם חרדים</button>
+                    </div>
+                    <input type="text" id="table-search" placeholder="חיפוש..." class="border rounded px-3 py-1 text-sm w-64 focus:outline-blue-500">
+                </div>
+                <div class="overflow-auto table-container flex-grow">
+                    <table class="w-full text-sm text-right">
+                        <thead class="bg-gray-100 sticky top-0 text-slate-600 z-10">
+                            <tr>
+                                <th class="p-3 font-semibold">שם</th>
+                                <th class="p-3 font-semibold">סוג/מעמד</th>
+                                <th class="p-3 font-semibold">מגזר</th>
+                                <th class="p-3 font-semibold text-center">דירוג סוציו'</th>
+                                <th class="p-3 font-semibold text-center">שכר ממוצע</th>
+                                <th class="p-3 font-semibold">אוכלוסייה</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body" class="divide-y divide-gray-100">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        
+        <footer class="text-center p-6 text-slate-400 text-xs mt-4">
+            מקור הנתונים: הלשכה המרכזית לסטטיסטיקה (הלמ"ס) 
+        </footer>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity opacity-0 pointer-events-none">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform" id="modal-content">
+            <div class="bg-blue-600 p-4 flex justify-between items-center text-white">
+                <h3 id="modal-title" class="font-bold text-lg">רשימת יישובים</h3>
+                <button onclick="closeModal()" class="hover:bg-blue-700 rounded p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 max-h-96 overflow-y-auto">
+                <ul id="modal-list" class="space-y-2 text-slate-700"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Utilities & Init ---
+        const colors = {
+            blue: 'rgba(59, 130, 246, 0.8)',
+            blueLight: 'rgba(59, 130, 246, 0.3)',
+            pink: 'rgba(236, 72, 153, 0.8)',
+            purple: 'rgba(147, 51, 234, 0.8)',
+            slate: '#64748b',
+            palette: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#14b8a6', '#6366f1']
+        };
+
+        let charts = {};
+        let currentTableMode = 'authorities';
+        let currentHarediScope = 'authorities';
+        let currentHarediMetric = 'pct'; // 'pct' or 'abs'
+
+        // On Load
+        document.addEventListener('DOMContentLoaded', () => {
+            initOverview();
+            initDemographics();
+            initSocioeconomic();
+            initSectors();
+            switchTable('authorities'); // Default view
+        });
+
+        // --- 2. Overview Section ---
+        function initOverview() {
+            const totalPop = settlementsData.reduce((sum, item) => sum + item.population, 0);
+            document.getElementById('kpi-total-pop').innerText = totalPop.toLocaleString();
+            document.getElementById('kpi-total-settlements').innerText = settlementsData.length;
+        }
+
+        // --- 3. Demographics Section ---
+        function initDemographics() {
+            // Populate Filters
+            const auths = [...new Set(settlementsData.map(i => i.authority))].sort();
+            const types = [...new Set(settlementsData.map(i => i.type_gross))].sort(); // Changed to type_gross
+            
+            // Populate Authorities & Types
+            const authSelect = document.getElementById('filter-authority');
+            const typeSelect = document.getElementById('filter-type');
+            auths.forEach(a => authSelect.add(new Option(a, a)));
+            types.forEach(t => typeSelect.add(new Option(t, t)));
+
+            // Populate Settlements (Initially All)
+            updateSettlementDropdown(settlementsData);
+
+            // Listeners
+            // When generic filters change, we update pyramid AND the available settlements
+            ['filter-authority', 'filter-sector', 'filter-type'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    updateSettlementOptions(); 
+                    updatePyramid();
+                });
+            });
+
+            // When specific settlement changes, we just update pyramid
+            document.getElementById('filter-settlement').addEventListener('change', updatePyramid);
+
+            document.getElementById('reset-demo-filters').addEventListener('click', () => {
+                document.getElementById('filter-authority').value = 'all';
+                document.getElementById('filter-sector').value = 'all';
+                document.getElementById('filter-type').value = 'all';
+                document.getElementById('filter-settlement').value = 'all';
+                updateSettlementOptions(); // Reset settlement list to full
+                updatePyramid();
+            });
+
+            // Initial Chart Render
+            renderPyramid(settlementsData); 
+        }
+
+        function updateSettlementOptions() {
+            // Get current filters state
+            const auth = document.getElementById('filter-authority').value;
+            const sector = document.getElementById('filter-sector').value;
+            const type = document.getElementById('filter-type').value;
+
+            // Filter the full list based on these categories
+            let filtered = settlementsData;
+            if (auth !== 'all') filtered = filtered.filter(d => d.authority === auth);
+            if (sector !== 'all') filtered = filtered.filter(d => d.sector === sector);
+            if (type !== 'all') filtered = filtered.filter(d => d.type_gross === type);
+
+            // Re-populate the settlement dropdown
+            updateSettlementDropdown(filtered);
+        }
+
+        function updateSettlementDropdown(dataList) {
+            const setSelect = document.getElementById('filter-settlement');
+            const currentVal = setSelect.value; // Try to keep selection if possible
+
+            setSelect.innerHTML = '<option value="all">כל היישובים (ברשימה)</option>';
+            
+            const names = dataList.map(i => i.name).sort((a,b) => a.localeCompare(b, 'he'));
+            names.forEach(n => setSelect.add(new Option(n, n)));
+
+            // Restore selection if it still exists in the new list
+            if (names.includes(currentVal)) {
+                setSelect.value = currentVal;
+            }
+        }
+
+        function updatePyramid() {
+            const auth = document.getElementById('filter-authority').value;
+            const sector = document.getElementById('filter-sector').value;
+            const type = document.getElementById('filter-type').value;
+            const settlement = document.getElementById('filter-settlement').value;
+
+            let filtered = settlementsData;
+            let isClean = true;
+            let labelText = "כלל האוכלוסייה";
+
+            // If a specific settlement is chosen, it overrides the aggregation of the others
+            // (The dropdown options are already filtered to match the categories, so this is safe)
+            if (settlement !== 'all') {
+                filtered = filtered.filter(d => d.name === settlement);
+                isClean = false;
+                labelText = settlement;
+            } else {
+                // Apply Category Filters
+                if (auth !== 'all') { filtered = filtered.filter(d => d.authority === auth); isClean = false; }
+                if (sector !== 'all') { filtered = filtered.filter(d => d.sector === sector); isClean = false; }
+                if (type !== 'all') { filtered = filtered.filter(d => d.type_gross === type); isClean = false; }
+                
+                if (!isClean) labelText = "מצב סינון";
+            }
+
+            const badge = document.getElementById('demo-mode-badge');
+            badge.innerText = labelText;
+            badge.className = isClean 
+                ? "px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
+                : "px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded-full";
+
+            renderPyramid(filtered);
+        }
+
+        function renderPyramid(subsetData) {
+            const bucketCount = 14;
+            // Handle case with no data
+            if (subsetData.length === 0) {
+                 // Clear chart or show empty state if preferred
+            }
+
+            const aggregate = (data) => {
+                const sums = { m: Array(bucketCount).fill(0), f: Array(bucketCount).fill(0) };
+                data.forEach(item => {
+                    if(item.ages) { // Safety check
+                        item.ages.m.forEach((val, i) => sums.m[i] += val);
+                        item.ages.f.forEach((val, i) => sums.f[i] += val);
+                    }
+                });
+                return sums;
+            };
+
+            const current = aggregate(subsetData);
+            const labels = ["0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65+"].reverse();
+            const dataM = [...current.m].reverse();
+            const dataF = [...current.f].reverse();
+            
+            const ctx = document.getElementById('pyramidChart').getContext('2d');
+            if (charts.pyramid) charts.pyramid.destroy();
+
+            // Calculate symmetric limit for nice visual
+            const maxVal = Math.max(...dataM, ...dataF);
+            const limit = maxVal > 0 ? maxVal * 1.1 : 10; 
+
+            charts.pyramid = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'גברים', data: dataM.map(v => v * -1), backgroundColor: colors.blue, borderRadius: 3, stack: 'Stack 0' },
+                        { label: 'נשים', data: dataF, backgroundColor: colors.pink, borderRadius: 3, stack: 'Stack 0' }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            min: -limit,
+                            max: limit,
+                            ticks: { display: false }, // Hidden Numbers
+                            grid: { color: '#e2e8f0' }
+                        },
+                        y: { stacked: true, grid: { display: false } }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(c) { return ` ${c.dataset.label}: ${Math.abs(c.raw).toLocaleString()} `; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 4. Socioeconomic Section (Using Authorities Data) ---
+        function initSocioeconomic() {
+            // Rank Chart - Average Rank by Authority
+            const sortedAuths = [...authoritiesData].sort((a,b) => b.socio_rank - a.socio_rank);
+            
+            const ctxRank = document.getElementById('socioRankChart').getContext('2d');
+            charts.rank = new Chart(ctxRank, {
+                type: 'bar',
+                data: {
+                    labels: sortedAuths.map(a => a.name),
+                    datasets: [{
+                        label: 'דירוג',
+                        data: sortedAuths.map(a => a.socio_rank),
+                        backgroundColor: colors.palette[1],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { borderDash: [2, 4] }, min: 0, max: 10 },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Wage Chart
+            const sortedWage = [...authoritiesData].sort((a,b) => b.wage - a.wage);
+            const ctxWage = document.getElementById('wageChart').getContext('2d');
+            charts.wage = new Chart(ctxWage, {
+                type: 'bar',
+                data: {
+                    labels: sortedWage.map(a => a.name),
+                    datasets: [{
+                        label: 'שכר ממוצע (₪)',
+                        data: sortedWage.map(a => a.wage),
+                        backgroundColor: colors.palette[2],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { borderDash: [2, 4] } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- 5. Sectors & Haredi ---
+        let currentTypeMode = 'gross';
+
+        function initSectors() {
+            // Initial Haredi Chart
+            updateHarediChart('authorities', 'pct');
+
+            // Types Chart
+            renderTypeChart('gross');
+        }
+
+        function updateHarediChart(scope, metric) {
+            currentHarediScope = scope;
+            currentHarediMetric = metric;
+
+            // Update Buttons UI
+            // Scope
+            document.getElementById('btn-haredi-auth').className = scope === 'authorities' ? "px-2 py-1 rounded bg-white shadow text-purple-700 font-bold transition" : "px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition";
+            document.getElementById('btn-haredi-set').className = scope === 'settlements' ? "px-2 py-1 rounded bg-white shadow text-purple-700 font-bold transition" : "px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition";
+            // Metric
+            document.getElementById('btn-haredi-pct').className = metric === 'pct' ? "px-2 py-1 rounded bg-white shadow text-purple-700 font-bold transition" : "px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition";
+            document.getElementById('btn-haredi-abs').className = metric === 'abs' ? "px-2 py-1 rounded bg-white shadow text-purple-700 font-bold transition" : "px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition";
+
+            let rawData, labels, chartData;
+
+            // 1. Select Data Source & Filter only > 0
+            if (scope === 'authorities') {
+                rawData = authoritiesData.filter(d => d.haredi_pct > 0);
+            } else {
+                rawData = settlementsData.filter(d => d.haredi_pct > 0);
+            }
+
+            // 2. Sort Logic (descending)
+            const processed = rawData.map(d => {
+                const abs = Math.round(d.population * (d.haredi_pct / 100));
+                return { 
+                    name: d.name, 
+                    pct: d.haredi_pct, 
+                    abs: abs 
+                };
+            });
+
+            if (metric === 'pct') {
+                processed.sort((a,b) => b.pct - a.pct);
+                chartData = processed.map(d => d.pct);
+            } else {
+                processed.sort((a,b) => b.abs - a.abs);
+                chartData = processed.map(d => d.abs);
+            }
+            
+            labels = processed.map(d => d.name);
+
+            // 3. Render
+            const ctx = document.getElementById('harediChart').getContext('2d');
+            if (charts.haredi) charts.haredi.destroy();
+
+            charts.haredi = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: metric === 'pct' ? '% חרדים' : 'מספר תושבים חרדים',
+                        data: chartData,
+                        backgroundColor: colors.purple,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { beginAtZero: true }, 
+                        x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 90, minRotation: 90, font: {size: 10} } } 
+                    }
+                }
+            });
+        }
+
+        function toggleTypeChart(mode) {
+            currentTypeMode = mode;
+            document.getElementById('btn-type-gross').className = mode === 'gross' 
+                ? "px-2 py-1 rounded bg-white shadow text-blue-700 font-medium transition"
+                : "px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition";
+            document.getElementById('btn-type-detailed').className = mode === 'detailed' 
+                ? "px-2 py-1 rounded bg-white shadow text-blue-700 font-medium transition"
+                : "px-2 py-1 rounded text-slate-500 hover:text-slate-700 transition";
+            renderTypeChart(mode);
+        }
+
+        function renderTypeChart(mode) {
+            const field = mode === 'gross' ? 'type_gross' : 'type_detailed';
+            const counts = {};
+            const namesMap = {}; 
+            settlementsData.forEach(d => {
+                const key = d[field];
+                if (!counts[key]) { counts[key] = 0; namesMap[key] = []; }
+                counts[key]++;
+                namesMap[key].push(d.name);
+            });
+
+            const labels = Object.keys(counts);
+            const dataVals = Object.values(counts);
+            const ctx = document.getElementById('typesChart').getContext('2d');
+            if (charts.types) charts.types.destroy();
+
+            charts.types = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: colors.palette,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            openModal(labels[index], namesMap[labels[index]]);
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 6. Table Section ---
+        function switchTable(mode) {
+            currentTableMode = mode;
+            // Update tabs UI
+            ['auth', 'set', 'haredi'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (t === (mode === 'authorities' ? 'auth' : mode === 'settlements' ? 'set' : 'haredi')) {
+                    el.className = 'text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-1 transition';
+                } else {
+                    el.className = 'text-sm font-medium text-slate-400 hover:text-slate-600 pb-1 transition';
+                }
+            });
+
+            renderTableData();
+        }
+
+        function renderTableData() {
+            let data = [];
+            const search = document.getElementById('table-search').value.toLowerCase();
+
+            if (currentTableMode === 'authorities') {
+                data = authoritiesData;
+            } else if (currentTableMode === 'settlements') {
+                data = settlementsData;
+            } else if (currentTableMode === 'haredi') {
+                data = settlementsData.filter(d => d.haredi_pct > 0);
+            }
+
+            // Apply Search
+            if (search) {
+                data = data.filter(d => d.name.toLowerCase().includes(search));
+            }
+
+            // Sort by Name
+            data.sort((a,b) => a.name.localeCompare(b.name, 'he'));
+
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = data.map(d => {
+                // Logic for displaying wage/rank
+                const showEcon = currentTableMode === 'authorities' || d.wage > 0;
+                
+                const rankDisplay = showEcon ? d.socio_rank : '-';
+                const wageDisplay = showEcon ? Math.round(d.wage).toLocaleString() : '-';
+                
+                const typeText = currentTableMode === 'authorities' ? d.type_gross : d.type_detailed;
+
+                return `
+                <tr class="hover:bg-blue-50 transition group border-b border-gray-50 last:border-0">
+                    <td class="p-3 font-medium text-slate-800">${d.name}</td>
+                    <td class="p-3 text-slate-500 text-xs">${typeText}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            d.sector === 'יהודי' ? 'bg-blue-100 text-blue-700' : 
+                            d.sector === 'דרוזי' ? 'bg-green-100 text-green-700' :
+                            'bg-orange-100 text-orange-700'
+                        }">${d.sector}</span>
+                    </td>
+                    <td class="p-3 text-slate-500 font-mono text-center">${rankDisplay}</td>
+                    <td class="p-3 text-slate-500 font-mono text-center">${wageDisplay}</td>
+                    <td class="p-3 text-slate-700 font-bold">${d.population.toLocaleString()}</td>
+                </tr>
+            `}).join('');
+        }
+
+        // Modal Logic
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalContent = document.getElementById('modal-content');
+
+        function openModal(title, list) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-list').innerHTML = list.map(name => `<li class="p-2 bg-gray-50 rounded hover:bg-gray-100">${name}</li>`).join('');
+            modalOverlay.classList.remove('hidden', 'pointer-events-none');
+            setTimeout(() => { modalOverlay.classList.remove('opacity-0'); modalContent.classList.add('scale-100'); }, 10);
+        }
+
+        function closeModal() {
+            modalOverlay.classList.add('opacity-0'); modalContent.classList.remove('scale-100');
+            setTimeout(() => { modalOverlay.classList.add('hidden', 'pointer-events-none'); }, 300);
+        }
+        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+        document.getElementById('table-search').addEventListener('keyup', renderTableData);
+
+    </script>
+</body>
+</html>

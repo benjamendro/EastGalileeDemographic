@@ -1,0 +1,20 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>Semantic colors</title><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+html,body{margin:0;padding:0;background:#f8fafc;}
+.frame{box-sizing:border-box;width:700px;min-height:200px;padding:24px;display:flex;flex-direction:column;justify-content:center;}
+.row{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;}
+.swatch{flex:1;min-width:60px;border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px 10px;font-size:11px;color:#1e293b;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.swatch.dark{color:#fff;}
+.tok{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;opacity:.85;}
+.legend{font-size:11px;color:#64748b;margin-bottom:6px;font-weight:500;}
+.mini-card{background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.05);padding:16px;}
+</style></head><body><div class="frame">
+<div class="legend">Status / signal — reserved for explicit semantics, not decorative use</div>
+<div class="row" style="margin-top:8px;">
+  <div class="swatch dark" style="background:#10b981;min-height:64px;"><div class="tok">#10b981</div><div>positive · above target</div></div>
+  <div class="swatch " style="background:#f59e0b;min-height:64px;"><div class="tok">#f59e0b</div><div>warning · borderline</div></div>
+  <div class="swatch dark" style="background:#ef4444;min-height:64px;"><div class="tok">#ef4444</div><div>negative · below target</div></div>
+  <div class="swatch dark" style="background:#64748b;min-height:64px;"><div class="tok">#64748b</div><div>neutral · n/a or suppressed</div></div>
+</div>
+<div class="egkc-caveat" style="margin-top:14px;">Red is reserved — never use as a dashboard's accent color.</div>
+</div></body></html>

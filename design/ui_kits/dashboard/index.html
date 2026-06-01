@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד בגרויות גליל מזרחי</title>
+
+    <!-- Tailwind for layout utilities (matches canonical template) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <!-- Design system tokens + Heebo -->
+    <link rel="stylesheet" href="../../colors_and_type.css">
+
+    <style>
+        /* Mirrors the canonical template's small custom block, ported to EGKC tokens */
+        body { background-color: var(--egkc-bg-app); font-family: "Heebo", system-ui, sans-serif; }
+        .chart-card { background-color: var(--egkc-surface); border-radius: var(--egkc-radius-lg); box-shadow: var(--egkc-shadow-sm); padding: 20px; }
+        .chart-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .chart-card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-container::-webkit-scrollbar-thumb { background: var(--egkc-scrollbar); border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: var(--egkc-fg-faint); }
+        select.egkc-select { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><path d='m6 9 6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: left 10px center; padding-left: 28px; appearance: none; }
+        /* Radio segmented control */
+        .seg { display: inline-flex; border: 1px solid var(--egkc-border); border-radius: var(--egkc-radius-sm); overflow: hidden; }
+        .seg input { display: none; }
+        .seg label { padding: 6px 12px; font-size: 13px; cursor: pointer; color: var(--egkc-fg-muted); border-left: 1px solid var(--egkc-border); user-select: none; transition: background 150ms ease; }
+        .seg label:last-child { border-left: 0; }
+        .seg input:checked + label { background: var(--egkc-accent); color: #fff; font-weight: 700; }
+        /* Diff chip */
+        .diff-pos { color: var(--egkc-positive); }
+        .diff-neg { color: var(--egkc-negative); }
+        .diff-zero { color: var(--egkc-fg-muted); }
+    </style>
+</head>
+<body class="text-slate-800 egkc-accent-cyan">
+
+<div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 w-full">
+
+    <!-- ─────────────────── HEADER ─────────────────── -->
+    <header class="egkc-card egkc-border-accent-edge flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+            <img src="mark.png" alt="" class="h-16 w-auto">
+            <div>
+                <h1 class="egkc-h1" style="color:#183048;">דשבורד בגרויות גליל מזרחי</h1>
+                <p class="egkc-subtitle mt-1">השוואת רשויות, ממוצע אשכול וממוצע ארצי · שנת תשפ"ד</p>
+            </div>
+        </div>
+        <div id="kpi-row" class="flex gap-3 flex-wrap"></div>
+    </header>
+
+    <!-- ─────────────────── FILTERS + HEADLINE CHART ─────────────────── -->
+    <section class="egkc-card">
+        <div class="flex flex-col md:flex-row gap-6">
+
+            <aside class="w-full md:w-1/4 space-y-4 md:border-l md:pl-6 border-slate-100">
+                <h3 class="egkc-h2">סינון</h3>
+
+                <div>
+                    <label class="egkc-label block mb-1.5">רשות מוניציפלית</label>
+                    <select id="f-authority" class="egkc-select w-full"></select>
+                </div>
+
+                <div>
+                    <label class="egkc-label block mb-1.5">מקצוע</label>
+                    <select id="f-subject" class="egkc-select w-full"></select>
+                </div>
+
+                <div>
+                    <label class="egkc-label block mb-1.5">יחידות לימוד</label>
+                    <div class="seg" id="f-yl">
+                        <input type="radio" name="yl" id="yl3" value="3"><label for="yl3">3</label>
+                        <input type="radio" name="yl" id="yl4" value="4"><label for="yl4">4</label>
+                        <input type="radio" name="yl" id="yl5" value="5" checked><label for="yl5">5</label>
+                    </div>
+                </div>
+
+                <button id="reset-filters" class="egkc-link-accent mt-2">איפוס סינונים</button>
+
+                <div class="pt-4 border-t border-slate-100 text-xs text-slate-500">
+                    <span>תצפיות מוצגות: </span><span id="row-count" class="font-bold text-slate-800">0</span>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 text-xs text-slate-500 leading-relaxed">
+                    לא מוצגים מוסדות עם פחות מ-11 נבחנים בהתאם להנחיות המקור.
+                </div>
+            </aside>
+
+            <div class="w-full md:w-3/4">
+                <div class="flex justify-between items-baseline mb-3 flex-wrap gap-2">
+                    <h2 class="egkc-h2">השוואת ביצועים במקצועות הליבה</h2>
+                    <span id="headline-caption" class="egkc-caveat"></span>
+                </div>
+                <div style="position:relative; height:340px;">
+                    <canvas id="chart-headline"></canvas>
+                </div>
+                <p class="egkc-caveat mt-2">
+                    שלושה ערכים לכל מקצוע: <b style="color:var(--egkc-accent)">הרשות הנבחרת</b> · <b style="color:#94a3b8">ממוצע אשכול</b> · <b style="color:#cbd5e1">ממוצע ארצי</b>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─────────────────── SECONDARY CHARTS ─────────────────── -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <div class="chart-card chart-card-hover lg:col-span-7">
+            <div class="flex justify-between items-baseline mb-2 flex-wrap gap-2">
+                <h2 class="egkc-h2">דירוג רשויות באשכול</h2>
+                <span id="ranked-caption" class="egkc-caveat"></span>
+            </div>
+            <div style="position:relative; height:320px;">
+                <canvas id="chart-ranked"></canvas>
+            </div>
+            <p class="egkc-caveat mt-2">
+                קו אדום מקווקו = ממוצע ארצי. ערך מעליו מסמן ביצועים מעל הממוצע הארצי.
+            </p>
+        </div>
+
+        <div class="chart-card chart-card-hover lg:col-span-5">
+            <div class="mb-2">
+                <h2 class="egkc-h2">מספר נבחנים לפי יח״ל</h2>
+                <span class="egkc-caveat" id="yl-caption"></span>
+            </div>
+            <div style="position:relative; height:320px;">
+                <canvas id="chart-yl"></canvas>
+            </div>
+            <p class="egkc-caveat mt-2">
+                התפלגות הנבחנים ברשות הנבחרת בין רמות 3, 4, ו-5 יח״ל. אחוז גבוה ב-5 יח״ל = מצוינות.
+            </p>
+        </div>
+    </section>
+
+    <!-- ─────────────────── DATA TABLE ─────────────────── -->
+    <section class="chart-card">
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+            <div class="flex gap-5 border-b border-slate-100 flex-grow" id="tab-row">
+                <button class="egkc-tab-active" data-tab="auth">תוצאות לפי רשות</button>
+                <button class="egkc-tab-inactive" data-tab="detail">פירוט הרשות הנבחרת</button>
+            </div>
+            <input id="table-search" type="text" placeholder="חיפוש..." class="egkc-input w-64">
+        </div>
+        <div class="overflow-auto table-container max-h-[420px]">
+            <table id="data-table" class="egkc-data-table w-full"></table>
+        </div>
+    </section>
+
+    <!-- ─────────────────── FOOTER ─────────────────── -->
+    <footer class="text-center p-6 egkc-footer-attr leading-relaxed">
+        מקור הנתונים: התנועה לחופש המידע · משרד החינוך · מינהל טכנולוגיות דיגיטליות ומידע · מרכז מידע בחינות בגרות. <br>
+        הנתונים עובדו על ידי מרכז הידע גליל מזרחי.
+    </footer>
+
+</div>
+
+<!-- Data + app -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

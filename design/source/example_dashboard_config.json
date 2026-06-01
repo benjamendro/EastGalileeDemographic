@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "title": "דמו - יישובי גליל מזרחי",
+    "subtitle": "נתוני דמוגרפיה וכלכלה",
+    "lang": "he",
+    "dir": "rtl",
+    "accent_color": "#2563eb",
+    "data_source": "מקור: קובץ בדיקה פנימי"
+  },
+  "data": {
+    "primary_table": "settlements",
+    "tables": {
+      "settlements": "/tmp/e2e/02_clean/cleaned.csv"
+    }
+  },
+  "kpis": [
+    {"id": "pop_total", "label": "סה\"כ אוכלוסייה", "type": "sum", "column": "population", "format": "int_comma"},
+    {"id": "count", "label": "מספר יישובים", "type": "count"},
+    {"id": "wage_avg", "label": "שכר ממוצע", "type": "mean", "column": "wage", "format": "currency_ils"}
+  ],
+  "filters": [
+    {"id": "sector", "label": "מגזר", "column": "sector", "type": "select", "include_all": true},
+    {"id": "authority", "label": "רשות", "column": "authority", "type": "select", "include_all": true}
+  ],
+  "charts": [
+    {
+      "id": "pop_by_sector",
+      "title": "אוכלוסייה לפי מגזר",
+      "type": "bar",
+      "orientation": "horizontal",
+      "dimension": "sector",
+      "measure": "population",
+      "aggregation": "sum",
+      "sort": "measure_desc",
+      "section_size": "md",
+      "value_format": "int_comma"
+    },
+    {
+      "id": "socio_dist",
+      "title": "התפלגות דירוג חברתי־כלכלי",
+      "type": "bar",
+      "dimension": "socio_rank",
+      "aggregation": "count",
+      "sort": "dimension_asc",
+      "section_size": "md"
+    },
+    {
+      "id": "wage_by_sector",
+      "title": "שכר ממוצע לפי מגזר",
+      "type": "bar",
+      "dimension": "sector",
+      "measure": "wage",
+      "aggregation": "mean",
+      "sort": "measure_desc",
+      "section_size": "md",
+      "value_format": "currency_ils"
+    }
+  ],
+  "table": {
+    "tabs": [
+      {
+        "id": "settlements",
+        "label": "יישובים",
+        "source": "settlements",
+        "columns": ["name", "authority", "sector", "population", "socio_rank", "wage"],
+        "default": true
+      }
+    ],
+    "search_columns": ["name", "authority"]
+  }
+}

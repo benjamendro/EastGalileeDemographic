@@ -1,0 +1,19 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>Donut / composition</title><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+html,body{margin:0;padding:0;background:#f8fafc;}
+.frame{box-sizing:border-box;width:700px;min-height:240px;padding:24px;display:flex;flex-direction:column;justify-content:center;}
+.legend{font-size:11px;color:#64748b;margin-bottom:6px;font-weight:500;}
+.seg-toggle{display:inline-flex;background:#f1f5f9;border-radius:6px;padding:2px;}
+.seg-toggle button{padding:4px 12px;font-size:12px;border-radius:4px;color:#64748b;font-weight:500;border:0;background:transparent;cursor:pointer;}
+.seg-toggle button.active{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1);color:#18a8c0;font-weight:700;}
+</style></head><body><div class="frame">
+<div class="legend">Settlement-type composition · click a slice → drill-down modal of that group</div>
+<div style="display:flex;align-items:center;gap:32px;margin-top:8px;">
+  <div style="width:140px;height:140px;border-radius:50%;background:conic-gradient(#18a8c0 0 42%,#903078 42% 60%,#1878a8 60% 74%,#90c048 74% 86%,#c0a860 86% 100%);position:relative;">
+    <div style="position:absolute;inset:28px;background:#fff;border-radius:50%;"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:#334155;">
+    <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#18a8c0;"></span>קיבוץ</div><div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#903078;"></span>מושב</div><div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#1878a8;"></span>יישוב קהילתי</div><div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#90c048;"></span>מועצה מקומית</div><div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:3px;background:#c0a860;"></span>עירייה</div>
+  </div>
+</div>
+</div></body></html>

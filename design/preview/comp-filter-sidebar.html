@@ -1,0 +1,37 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>Filter sidebar</title><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+html,body{margin:0;padding:0;background:#f8fafc;}
+.frame{box-sizing:border-box;width:700px;min-height:360px;padding:24px;display:flex;flex-direction:column;justify-content:center;}
+.row{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;}
+.swatch{flex:1;min-width:60px;border-radius:8px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px 10px;font-size:11px;color:#1e293b;font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.swatch.dark{color:#fff;}
+.tok{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;opacity:.85;}
+.legend{font-size:11px;color:#64748b;margin-bottom:6px;font-weight:500;}
+.mini-card{background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.05);padding:16px;}
+</style></head><body><div class="frame">
+<div class="egkc-card" style="max-width:260px;">
+  <div class="egkc-h2" style="margin-bottom:14px;">סינון</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div>
+      <div class="egkc-label" style="margin-bottom:4px;">רשות מוניציפלית</div>
+      <select class="egkc-select" style="width:100%;">
+        <option>הכל</option><option>מטולה</option><option>קרית שמונה</option><option>צפת</option>
+      </select>
+    </div>
+    <div>
+      <div class="egkc-label" style="margin-bottom:4px;">מגזר</div>
+      <select class="egkc-select" style="width:100%;">
+        <option>הכל</option><option>יהודי</option><option>ערבי</option><option>דרוזי</option>
+      </select>
+    </div>
+    <div>
+      <div class="egkc-label" style="margin-bottom:4px;">צורת יישוב</div>
+      <select class="egkc-select" style="width:100%;"><option>הכל</option></select>
+    </div>
+  </div>
+  <a class="egkc-link-accent" style="display:inline-block;margin-top:14px;">איפוס סינונים</a>
+  <div style="border-top:1px solid #f1f5f9;margin-top:14px;padding-top:10px;font-size:12px;color:#64748b;">
+    תצפיות מוצגות: <b style="color:#1e293b;">1,247</b>
+  </div>
+</div>
+</div></body></html>

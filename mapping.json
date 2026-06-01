@@ -1,0 +1,532 @@
+{
+  "קריית שמונה": {
+    "sector": "יהודי",
+    "type_gross": "עירייה",
+    "authority": "קריית שמונה"
+  },
+  "מטולה": {
+    "sector": "יהודי",
+    "type_gross": "מועצה מקומית",
+    "authority": "מטולה"
+  },
+  "קצרין": {
+    "sector": "יהודי",
+    "type_gross": "מועצה מקומית",
+    "authority": "קצרין"
+  },
+  "חצור הגלילית": {
+    "sector": "יהודי",
+    "type_gross": "מועצה מקומית",
+    "authority": "חצור הגלילית"
+  },
+  "ראש פינה": {
+    "sector": "יהודי",
+    "type_gross": "מועצה מקומית",
+    "authority": "ראש פינה"
+  },
+  "צפת": {
+    "sector": "יהודי",
+    "type_gross": "עירייה",
+    "authority": "צפת"
+  },
+  "יסוד המעלה": {
+    "sector": "יהודי",
+    "type_gross": "מועצה מקומית",
+    "authority": "יסוד המעלה"
+  },
+  "מג'דל שמס": {
+    "sector": "דרוזי",
+    "type_gross": "מועצה מקומית",
+    "authority": "מג'דל שמס"
+  },
+  "מסעדה": {
+    "sector": "דרוזי",
+    "type_gross": "מועצה מקומית",
+    "authority": "מסעדה"
+  },
+  "בוקעאתא": {
+    "sector": "דרוזי",
+    "type_gross": "מועצה מקומית",
+    "authority": "בוקעאתא"
+  },
+  "עין קנייא": {
+    "sector": "דרוזי",
+    "type_gross": "מועצה מקומית",
+    "authority": "עין קנייא"
+  },
+  "ג'ש (גוש חלב)": {
+    "sector": "ערבי",
+    "type_gross": "מועצה מקומית",
+    "authority": "ג'ש (גוש חלב)"
+  },
+  "טובא-זנגרייה": {
+    "sector": "ערבי",
+    "type_gross": "מועצה מקומית",
+    "authority": "טובא-זנגרייה"
+  },
+  "ע'ג'ר": {
+    "sector": "ערבי",
+    "type_gross": "מועצה מקומית",
+    "authority": "ע'ג'ר"
+  },
+  "יובל": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "מרגליות": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "כורזים": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "אליפלט": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "אמנון": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "בית הלל": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "דישון": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "כחל": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "כרכום": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "מבואות החרמון"
+  },
+  "משמר הירדן": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "רמות נפתלי": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "שאר ישוב": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "שדה אליעזר": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מבואות החרמון"
+  },
+  "יפתח": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "להבות הבשן": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "איילת השחר": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "ברעם": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "צבעון": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "גדות": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "גונן": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "דן": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "דפנה": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "הגושרים": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "חולתה": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "יראון": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "כפר בלום": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "כפר גלעדי": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "כפר הנשיא": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "כפר סאלד": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "מחניים": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "מנרה": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "מעיין ברוך": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "משגב עם": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "נאות מרדכי": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "סאסא": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "עמיעד": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "עמיר": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "קדרים": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "שדה נחמיה": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "שמיר": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "שניר": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "הגליל העליון"
+  },
+  "אל-רום": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "נאות גולן": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "אבני איתן": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "אודם": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "אורטל": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "אלוני הבשן": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "אניעם": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "אפיק": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "בני יהודה": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "גולן"
+  },
+  "גבעת יואב": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "גשור": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "חד נס": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "גולן"
+  },
+  "חספין": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "גולן"
+  },
+  "יונתן": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "כנף": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "כפר חרוב": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "מבוא חמה": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "מיצר": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "מעלה גמלא": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "מרום גולן": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "נוב": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "נווה אטי\"ב": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "נטור": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "עין זיוון": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "גולן"
+  },
+  "קדמת צבי": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "קלע אלון": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "גולן"
+  },
+  "קשת": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "רמות": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "רמת מגשימים": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "שעל": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "גולן"
+  },
+  "פרוד": {
+    "sector": "יהודי",
+    "type_gross": "קיבוץ",
+    "authority": "מרום הגליל"
+  },
+  "כפר חושן (ספסופה)": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "עין אל-אסד": {
+    "sector": "דרוזי",
+    "type_gross": "יישוב כפרי",
+    "authority": "מרום הגליל"
+  },
+  "ריחאניה": {
+    "sector": "ערבי",
+    "type_gross": "יישוב כפרי",
+    "authority": "מרום הגליל"
+  },
+  "אביבים": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "אור הגנוז": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "מרום הגליל"
+  },
+  "אמירים": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "בר יוחאי": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "מרום הגליל"
+  },
+  "דוב\"ב": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "דלתון": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "חזון": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "טפחות": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "כפר חנניה": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "מרום הגליל"
+  },
+  "כפר שמאי": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "כרם בן זמרה": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "מירון": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "עלמה": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "עמוקה": {
+    "sector": "יהודי",
+    "type_gross": "יישוב קהילתי",
+    "authority": "מרום הגליל"
+  },
+  "שזור": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "שפר": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  },
+  "כלנית": {
+    "sector": "יהודי",
+    "type_gross": "מושב",
+    "authority": "מרום הגליל"
+  }
+}

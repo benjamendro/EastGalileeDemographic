@@ -1,0 +1,20 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>Drill-down filter cascade</title><link rel="stylesheet" href="../colors_and_type.css">
+<style>
+html,body{margin:0;padding:0;background:#f8fafc;}
+.frame{box-sizing:border-box;width:700px;min-height:360px;padding:24px;display:flex;flex-direction:column;justify-content:center;}
+.legend{font-size:11px;color:#64748b;margin-bottom:6px;font-weight:500;}
+.seg-toggle{display:inline-flex;background:#f1f5f9;border-radius:6px;padding:2px;}
+.seg-toggle button{padding:4px 12px;font-size:12px;border-radius:4px;color:#64748b;font-weight:500;border:0;background:transparent;cursor:pointer;}
+.seg-toggle button.active{background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.1);color:#18a8c0;font-weight:700;}
+</style></head><body><div class="frame">
+<div class="legend">Filters narrow each other: pick a רשות → the יישוב list shows only its villages. Resolution chip tracks depth.</div>
+<div class="egkc-card" style="max-width:260px;margin-top:8px;">
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div><div class="egkc-label" style="margin-bottom:3px;">רשות מוניציפלית</div><select class="egkc-select" style="width:100%;"><option>גולן</option></select></div>
+    <div><div class="egkc-label" style="margin-bottom:3px;">מגזר</div><select class="egkc-select" style="width:100%;"><option>הכל</option></select></div>
+    <div><div class="egkc-label" style="margin-bottom:3px;">צורת יישוב</div><select class="egkc-select" style="width:100%;"><option>קיבוץ</option></select></div>
+    <div style="border-top:1px solid #f1f5f9;padding-top:8px;"><div class="egkc-label" style="margin-bottom:3px;">יישוב ספציפי</div><select class="egkc-select" style="width:100%;background:#e6f6f9;"><option>מרום גולן</option></select></div>
+  </div>
+  <div style="border-top:1px solid #f1f5f9;margin-top:12px;padding-top:8px;font-size:12px;color:#64748b;">רזולוציה: <b style="color:#18a8c0;">יישוב</b></div>
+</div>
+</div></body></html>
