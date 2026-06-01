@@ -17,7 +17,8 @@
 
     const state = {
         authority: "all", sector: "all", type: "all", settlement: "all",
-        search: "", tab: "authorities", harediScope: "authorities", harediMetric: "pct", depMetric: "ratio"
+        search: "", tab: "authorities", harediScope: "authorities", harediMetric: "pct", depMetric: "ratio",
+        ageYoungMetric: "pct", ageWorkMetric: "pct", ageOldMetric: "pct"
     };
 
     const fmt = {
@@ -97,16 +98,30 @@
         bindToggle("haredi-scope", v => { state.harediScope = v; chartHaredi(); });
         bindToggle("haredi-metric", v => { state.harediMetric = v; chartHaredi(); });
         bindToggle("dep-metric", v => { state.depMetric = v; renderDependency(); });
+        bindToggle("age-young-metric", v => { state.ageYoungMetric = v; renderAgeCharts(); });
+        bindToggle("age-work-metric", v => { state.ageWorkMetric = v; renderAgeCharts(); });
+        bindToggle("age-old-metric", v => { state.ageOldMetric = v; renderAgeCharts(); });
     }
 
     function renderKPIs() {
         const rows = filtered();
         const totalPop = rows.reduce((a,s)=>a+s.population,0);
         const count = rows.length;
+        
+        const sum014 = rows.reduce((a,s)=>a+(s.pop_0_14||0),0);
+        const sum1564 = rows.reduce((a,s)=>a+(s.pop_15_64||0),0);
+        const sum65p = rows.reduce((a,s)=>a+(s.pop_65_plus||0),0);
+        const knownAgesPop = sum014 + sum1564 + sum65p;
+        const pct014 = knownAgesPop ? (sum014 / knownAgesPop * 100) : 0;
+        const pct1564 = knownAgesPop ? (sum1564 / knownAgesPop * 100) : 0;
+        const pct65p = knownAgesPop ? (sum65p / knownAgesPop * 100) : 0;
 
         document.getElementById("kpi-row").innerHTML = `
             <div class="egkc-kpi-card egkc-kpi-tinted"><div class="egkc-kpi-numeral">${fmt.int(totalPop)}</div><div class="egkc-kpi-label">סה״כ אוכלוסייה</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#475569;">${fmt.int(count)}</div><div class="egkc-kpi-label">יישובים</div></div>
+            <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#18a8c0;">${fmt.pct1(pct014)}</div><div class="egkc-kpi-label">צעירים (0-14) &bull; ${fmt.int(sum014)}</div></div>
+            <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#90c048;">${fmt.pct1(pct1564)}</div><div class="egkc-kpi-label">עבודה (15-64) &bull; ${fmt.int(sum1564)}</div></div>
+            <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#c0a860;">${fmt.pct1(pct65p)}</div><div class="egkc-kpi-label">ותיקים (65+) &bull; ${fmt.int(sum65p)}</div></div>
         `;
         const scope = state.settlement!=="all" ? state.settlement : state.authority!=="all" ? state.authority : "כלל האשכול";
         document.getElementById("pyramid-scope").textContent = scope;
@@ -202,6 +217,28 @@
         });
     }
 
+    function renderAgeCharts() {
+        const renderAgeChart = (id, key, color, metric) => {
+            kill(id);
+            const isPct = metric === "pct";
+            let chartRows = AUTHORITIES.filter(r => (r[key]||0) > 0).map(r => {
+                const totalAge = (r.pop_0_14||0) + (r.pop_15_64||0) + (r.pop_65_plus||0);
+                const pct = totalAge > 0 ? (r[key] / totalAge * 100) : 0;
+                return { name: r.name, abs: r[key], pct: pct };
+            });
+            chartRows.sort((a,b) => b[isPct ? "pct" : "abs"] - a[isPct ? "pct" : "abs"]);
+            
+            charts[id] = new Chart(document.getElementById("chart-"+id), {
+                type:"bar", data:{ labels:chartRows.map(r=>r.name), datasets:[{ data:chartRows.map(r=>r[isPct ? "pct" : "abs"]), backgroundColor:color, borderRadius:3 }] },
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>isPct ? fmt.pct1(c.parsed.y) : fmt.int(c.parsed.y)}} }, scales:{ x:{ ticks:{ font:{...FONT,size:9}, maxRotation:90, minRotation:45 } }, y:{ ticks:{ font:FONT, callback:v=>isPct ? fmt.pct1(v) : fmt.int(v) } } } }
+            });
+        };
+        
+        renderAgeChart("age-young", "pop_0_14", C.accent, state.ageYoungMetric);
+        renderAgeChart("age-work", "pop_15_64", C.lime, state.ageWorkMetric);
+        renderAgeChart("age-old", "pop_65_plus", C.gold, state.ageOldMetric);
+    }
+
     function renderDependency() {
         kill("dependency");
         const rows = AUTHORITIES.filter(r=>r.dependency_ratio!=null && r.dependency_ratio!==0).sort((a,b)=>b.dependency_ratio-a.dependency_ratio);
@@ -239,7 +276,7 @@
     }
 
     function render() {
-        renderKPIs(); chartPyramid(); chartHaredi(); chartTypes(); renderTable(); renderDependency();
+        renderKPIs(); chartPyramid(); chartHaredi(); chartTypes(); renderTable(); renderAgeCharts(); renderDependency();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -249,6 +286,8 @@
             makeBarChart("growth", AUTHORITIES, "pop_growth", v => v >= 0 ? C.sky : "#ef4444", fmt.pct1);
             makeBarChart("migration", AUTHORITIES, "migration_balance", v => v >= 0 ? C.gold : "#f97316", fmt.int);
             makeBarChart("immigrants", AUTHORITIES, "immigrants_1990_pct", C.blue, fmt.pct1);
+            renderAgeCharts();
+            renderDependency();
         }, 100);
     });
 })();

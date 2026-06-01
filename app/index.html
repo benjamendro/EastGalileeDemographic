@@ -34,7 +34,6 @@
             <img src="../design/uploads/לוגו מרכז הידע חדש עם גליל מערבי רקע לבן.jpg" alt="לוגו" class="h-16 w-auto">
             <div>
                 <h1 class="egkc-h1" style="color:#183048;">דשבורד דמוגרפיה גליל מזרחי</h1>
-                <p class="egkc-subtitle mt-1">מקור המידע הוא לוחות למס, הנתונים עובדו על ידי מרכז הידע גליל מזרחי מערבי</p>
             </div>
         </div>
         <div id="kpi-row" class="flex gap-3 flex-wrap"></div>
@@ -63,7 +62,6 @@
                     </div>
                     <div style="position:relative; min-height:360px; flex-grow:1;"><canvas id="chart-pyramid"></canvas></div>
                     <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - אוכלוסייה ברמת אזור סטטיסטי 2023</p>
-                    <p class="egkc-caveat mt-1 text-center"><span style="color:var(--egkc-accent);font-weight:700;">▮ גברים</span> מוצגים משמאל, <span style="color:#903078;font-weight:700;">▮ נשים</span> מימין. צעירים למטה, מבוגרים למעלה.</p>
                 </div>
             </div>
         </section>
@@ -78,7 +76,7 @@
                     </div>
                 </div>
                 <div style="position:relative;flex-grow:1;width:100%;"><canvas id="chart-haredi"></canvas></div>
-                <p class="text-xs text-slate-500 mt-2 text-center">מקור: לחרדים ביישובים יהודיים ומעורבים, סוף 2023</p>
+                <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - חרדים 2023</p>
             </div>
             <div class="chart-card chart-card-hover" style="height:300px;display:flex;flex-direction:column;">
                 <div class="flex justify-between items-start mb-2"><h3 class="egkc-h3">פילוח יישובים</h3></div>
@@ -93,13 +91,13 @@
                 <div>
                     <h3 class="egkc-h3 mb-2 flex items-center gap-2"><span style="width:6px;height:24px;background:var(--egkc-lime,#90c048);border-radius:2px;"></span>מדד סוציו-אקונומי (רשויות)</h3>
                     <div style="height:260px;position:relative;"><canvas id="chart-socio"></canvas></div>
-                    <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - מדד סוציו-אקונומי - קובץ רשויות מקומיות 2024</p>
+                    <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - מדד סוציו-אקונומי (קובץ רשויות מקומיות 2024)</p>
                 </div>
                 <div>
                     <h3 class="egkc-h3 mb-2 flex items-center gap-2"><span style="width:6px;height:24px;background:#48c0f0;border-radius:2px;"></span>גידול אוכלוסייה % (רשויות)</h3>
                     <div style="height:260px;position:relative;"><canvas id="chart-growth"></canvas></div>
                     <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - אומדנים ארעיים לסוף דצמבר 2025</p>
-                    <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">אופן חישוב: (אוכלוסיית 2025 חלקי אוכלוסיית 2023) </p>
+                    <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">אופן חישוב: (אוכלוסיית 2025 חלקי אוכלוסיית 2023) פחות 1</p>
                 </div>
                 <!-- Row 2 -->
                 <div class="mt-4">
@@ -109,19 +107,41 @@
                     <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">אופן חישוב: חיבור מאזן הגירה פנימית + מאזן הגירה בינלאומית</p>
                 </div>
                 <div class="mt-4">
+                    <h3 class="egkc-h3 mb-2 flex items-center gap-2"><span style="width:6px;height:24px;background:#1878a8;border-radius:2px;"></span>אחוז עולי 1990+ (רשויות)</h3>
+                    <div style="height:260px;position:relative;"><canvas id="chart-immigrants"></canvas></div>
+                    <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - אוכלוסייה ופיזי (קובץ רשויות מקומיות 2024)</p>
+                </div>
+                <!-- Row 3 (Age & Dep 2x2 block starts here) -->
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="egkc-h3 flex items-center gap-2"><span style="width:6px;height:24px;background:#18a8c0;border-radius:2px;"></span>אוכלוסייה צעירה (0-14)</h3>
+                        <div class="seg-toggle" id="age-young-metric"><button data-val="pct" class="active">%</button><button data-val="abs">מספר</button></div>
+                    </div>
+                    <div style="height:260px;position:relative;"><canvas id="chart-age-young"></canvas></div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="egkc-h3 flex items-center gap-2"><span style="width:6px;height:24px;background:#90c048;border-radius:2px;"></span>בגילאי עבודה (15-64)</h3>
+                        <div class="seg-toggle" id="age-work-metric"><button data-val="pct" class="active">%</button><button data-val="abs">מספר</button></div>
+                    </div>
+                    <div style="height:260px;position:relative;"><canvas id="chart-age-work"></canvas></div>
+                </div>
+                <!-- Row 4 -->
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="egkc-h3 flex items-center gap-2"><span style="width:6px;height:24px;background:#c0a860;border-radius:2px;"></span>אוכלוסייה ותיקה (65+)</h3>
+                        <div class="seg-toggle" id="age-old-metric"><button data-val="pct" class="active">%</button><button data-val="abs">מספר</button></div>
+                    </div>
+                    <div style="height:260px;position:relative;"><canvas id="chart-age-old"></canvas></div>
+                </div>
+                <div class="mt-4">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="egkc-h3 flex items-center gap-2"><span style="width:6px;height:24px;background:#903078;border-radius:2px;"></span>יחס תלות (רשויות)</h3>
                         <div class="seg-toggle" id="dep-metric"><button data-val="ratio" class="active">יחסי</button><button data-val="per100">ל-100 תושבים</button></div>
                     </div>
                     <div style="height:260px;position:relative;"><canvas id="chart-dependency"></canvas></div>
                     <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - דמוגרפיה 2023</p>
-                    <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">אופן חישוב: אוכלוסייה תלויה (גילאי 0-14 ו-65+) חלקי אוכלוסייה בגילאי עבודה (15-64)</p>
-                </div>
-                <!-- Row 3 -->
-                <div class="mt-4">
-                    <h3 class="egkc-h3 mb-2 flex items-center gap-2"><span style="width:6px;height:24px;background:#1878a8;border-radius:2px;"></span>אחוז עולי 1990+ (רשויות)</h3>
-                    <div style="height:260px;position:relative;"><canvas id="chart-immigrants"></canvas></div>
-                    <p class="text-xs text-slate-500 mt-2 text-center">(מקור: למ"ס - קובץ רשויות מקומיות 2024)</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">אופן חישוב: אוכלוסייה תלויה חלקי אוכלוסייה בגילאי עבודה</p>
                 </div>
 
             </div>
