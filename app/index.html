@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דשבורד דמוגרפיה גליל מזרחי</title>
+    <title>דשבורד דמוגרפיה גליל מזרחי ומערבי</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="../design/colors_and_type.css">
@@ -33,7 +33,7 @@
         <div class="flex items-center gap-4">
             <img src="../design/uploads/לוגו מרכז הידע חדש עם גליל מערבי רקע לבן.jpg" alt="לוגו" class="h-16 w-auto">
             <div>
-                <h1 class="egkc-h1" style="color:#183048;">דשבורד דמוגרפיה גליל מזרחי</h1>
+                <h1 class="egkc-h1" style="color:#183048;">דשבורד דמוגרפיה גליל מזרחי ומערבי</h1>
             </div>
         </div>
         <div id="kpi-row" class="flex gap-3 flex-wrap"></div>
@@ -47,6 +47,7 @@
                         <span style="width:8px;height:8px;border-radius:50%;background:var(--egkc-accent);display:inline-block;"></span>
                         דמוגרפיה
                     </h3>
+                    <div><label class="egkc-label block mb-1.5">אזור</label><select id="f-region" class="egkc-select w-full"><option value="all">כלל האשכול</option><option value="מזרחי">גליל מזרחי</option><option value="מערבי">גליל מערבי</option></select></div>
                     <div><label class="egkc-label block mb-1.5">רשות מוניציפלית</label><select id="f-authority" class="egkc-select w-full"><option value="all">כל הרשויות</option></select></div>
                     <div><label class="egkc-label block mb-1.5">מגזר</label><select id="f-sector" class="egkc-select w-full"><option value="all">כל המגזרים</option></select></div>
                     <div><label class="egkc-label block mb-1.5">צורת יישוב</label><select id="f-type" class="egkc-select w-full"><option value="all">כל הצורות</option></select></div>
