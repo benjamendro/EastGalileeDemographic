@@ -7,7 +7,7 @@ import re
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-EASTERN_GALILEE_CODES = [
+EASTERN_CODES = [
     # Councils & Cities
     5501, 5555, 5502, 8000, 487, 5571, 4100, 26, 2034, 29, 43, 2800, 4203, 4001, 4201, 4502, 962, 4501,
     # Settlements
@@ -17,7 +17,17 @@ EASTERN_GALILEE_CODES = [
     4011, 4002, 4012, 4021, 4028, 4008, 4551, 4304, 4303, 4025, 4702, 4009, 4013, 4003, 4301, 4022, 4004, 4204, 4019, 4101, 4014, 4503, 4010, 4017, 4007, 4006, 4701, 4015, 4026, 4024, 4005
 ]
 
-directory = r'd:\Users\97252\Desktop\Benny\WORK\מרכז ידע\02-מסדי נתונים\01-רשויות\דמוגרפיה'
+WESTERN_CODES = [
+    # Councils & Cities
+    9100, 7600, 5504, 1063, 1292, 502, 473, 480, 5552, 507, 1296, 812, 496, 536, 485, 1263, 517, 518, 535,
+    # Settlements
+    1068, 294, 313, 572, 463, 574, 280, 409, 575, 576, 297, 579, 595, 325, 454, 376, 289, 432, 785, 559, 712, 589, 674, 792, 708, 1256, 1183, 1143, 1246, 658, 390,
+    1081, 603, 755, 662, 795, 1130, 1173, 1205, 570, 1147, 892, 813, 281, 774, 614, 1045, 1220, 1206, 1208, 1184, 1314, 1219
+]
+
+ALL_CODES = EASTERN_CODES + WESTERN_CODES
+
+directory = r'd:\Users\97252\Desktop\Benny\WORK\מרכז ידע\02-מסדי נתונים\01-רשויות\דמוגרפיה\Demography_Dashboard_Package'
 
 def clean_value(val):
     if pd.isna(val) or val == '..' or val == '-': return 0
@@ -29,7 +39,7 @@ with open(os.path.join(directory, 'mapping.json'), 'r', encoding='utf-8') as f:
     html_mapping = json.load(f)
 
 # 2. Parse skill markdown for exact settlement types and true authorities
-skill_path = os.path.join(directory, 'work', 'eshkol_matching_skill.md')
+skill_path = os.path.join(directory, 'docs', 'eshkol_matching_skill.md')
 eshkol_type_map = {}
 eshkol_auth_map = {}
 if os.path.exists(skill_path):
@@ -166,7 +176,7 @@ df_dict = pd.read_excel(os.path.join(directory, 'מילון רשות מקומי�
 df_dict = df_dict[['SemelRashut', 'ShemRashut', 'SemelSugMaamad']]
 
 # 8. Merge Everything
-result_df = pd.DataFrame({'SemelRashut': EASTERN_GALILEE_CODES})
+result_df = pd.DataFrame({'SemelRashut': ALL_CODES})
 result_df = result_df.merge(df_dict, on='SemelRashut', how='left')
 result_df = result_df.merge(df_names, on='SemelRashut', how='left')
 result_df['ShemRashut'] = result_df['ShemRashut'].fillna(result_df['ShemRashut_2023']).str.strip()
@@ -229,10 +239,13 @@ for idx, row in result_df.iterrows():
     haredi_pct = (pop_haredim / pop_2023 * 100) if pop_2023 > 0 else 0
     
     migration_balance = (row['Internal_Migration'] or 0) + (row['International_Migration'] or 0)
+    
+    region = 'מזרחי' if semel in EASTERN_CODES else 'מערבי'
 
     obj = {
         'SemelRashut': semel,
         'name': name,
+        'region': region,
         'authority': authority,
         'sector': sector,
         'type_gross': type_gross,

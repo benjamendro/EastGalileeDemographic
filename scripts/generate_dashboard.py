@@ -4,7 +4,7 @@ import sys
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-directory = r'd:\Users\97252\Desktop\Benny\WORK\מרכז ידע\02-מסדי נתונים\01-רשויות\דמוגרפיה'
+directory = r'd:\Users\97252\Desktop\Benny\WORK\מרכז ידע\02-מסדי נתונים\01-רשויות\דמוגרפיה\Demography_Dashboard_Package'
 app_dir = os.path.join(directory, 'app')
 
 if not os.path.exists(app_dir):
@@ -39,7 +39,7 @@ html_content = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>דשבורד דמוגרפיה גליל מזרחי</title>
+    <title>דשבורד דמוגרפיה גליל מזרחי ומערבי</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="../design/colors_and_type.css">
@@ -69,7 +69,7 @@ html_content = """<!DOCTYPE html>
         <div class="flex items-center gap-4">
             <img src="../design/uploads/לוגו מרכז הידע חדש עם גליל מערבי רקע לבן.jpg" alt="לוגו" class="h-16 w-auto">
             <div>
-                <h1 class="egkc-h1" style="color:#183048;">דשבורד דמוגרפיה גליל מזרחי</h1>
+                <h1 class="egkc-h1" style="color:#183048;">דשבורד דמוגרפיה גליל מזרחי ומערבי</h1>
             </div>
         </div>
         <div id="kpi-row" class="flex gap-3 flex-wrap"></div>
@@ -83,6 +83,7 @@ html_content = """<!DOCTYPE html>
                         <span style="width:8px;height:8px;border-radius:50%;background:var(--egkc-accent);display:inline-block;"></span>
                         דמוגרפיה
                     </h3>
+                    <div><label class="egkc-label block mb-1.5">אזור</label><select id="f-region" class="egkc-select w-full"><option value="all">כלל האשכול</option><option value="מזרחי">גליל מזרחי</option><option value="מערבי">גליל מערבי</option></select></div>
                     <div><label class="egkc-label block mb-1.5">רשות מוניציפלית</label><select id="f-authority" class="egkc-select w-full"><option value="all">כל הרשויות</option></select></div>
                     <div><label class="egkc-label block mb-1.5">מגזר</label><select id="f-sector" class="egkc-select w-full"><option value="all">כל המגזרים</option></select></div>
                     <div><label class="egkc-label block mb-1.5">צורת יישוב</label><select id="f-type" class="egkc-select w-full"><option value="all">כל הצורות</option></select></div>
@@ -253,7 +254,7 @@ app_js_content = """(function () {
     const FONT = { family: "Heebo" };
 
     const state = {
-        authority: "all", sector: "all", type: "all", settlement: "all",
+        region: "all", authority: "all", sector: "all", type: "all", settlement: "all",
         search: "", tab: "authorities", harediScope: "authorities", harediMetric: "pct", depMetric: "ratio",
         ageYoungMetric: "pct", ageWorkMetric: "pct", ageOldMetric: "pct"
     };
@@ -265,6 +266,7 @@ app_js_content = """(function () {
 
     function filtered() {
         return SETTLEMENTS.filter(s =>
+            (state.region === "all" || s.region === state.region) &&
             (state.authority === "all" || s.authority === state.authority) &&
             (state.sector === "all" || s.sector === state.sector) &&
             (state.type === "all" || s.type_gross === state.type) &&
@@ -272,11 +274,22 @@ app_js_content = """(function () {
         );
     }
 
+    function filteredAuthorities() {
+        return AUTHORITIES.filter(s => state.region === "all" || s.region === state.region);
+    }
+
     function initFilters() {
         const fill = (id, items, allLabel) => document.getElementById(id).innerHTML = `<option value="all">${allLabel}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join("");
         
         const updateCascading = () => {
-            const authPool = SETTLEMENTS.filter(s => state.authority === "all" || s.authority === state.authority);
+            const regPool = SETTLEMENTS.filter(s => state.region === "all" || s.region === state.region);
+            
+            const auths = [...new Set(regPool.map(s => s.authority))].sort((a,b)=>a.localeCompare(b,"he"));
+            if (!auths.includes(state.authority)) state.authority = "all";
+            fill("f-authority", auths, "כל הרשויות");
+            document.getElementById("f-authority").value = state.authority;
+            
+            const authPool = regPool.filter(s => state.authority === "all" || s.authority === state.authority);
             
             const sectors = [...new Set(authPool.map(s => s.sector))].sort((a,b)=>a.localeCompare(b,"he"));
             if (!sectors.includes(state.sector)) state.sector = "all";
@@ -295,8 +308,6 @@ app_js_content = """(function () {
             document.getElementById("f-settlement").value = state.settlement;
         };
 
-        const auths = [...new Set(SETTLEMENTS.map(s => s.authority))].sort((a,b)=>a.localeCompare(b,"he"));
-        fill("f-authority", auths, "כל הרשויות");
         updateCascading();
 
         const bindChange = (id, key) => {
@@ -306,6 +317,7 @@ app_js_content = """(function () {
                 render();
             });
         };
+        bindChange("f-region", "region");
         bindChange("f-authority", "authority"); 
         bindChange("f-sector", "sector"); 
         bindChange("f-type", "type"); 
@@ -313,7 +325,8 @@ app_js_content = """(function () {
 
         document.getElementById("reset-filters").addEventListener("click", e => {
             e.preventDefault();
-            Object.assign(state, { authority:"all", sector:"all", type:"all", settlement:"all" });
+            Object.assign(state, { region:"all", authority:"all", sector:"all", type:"all", settlement:"all" });
+            document.getElementById("f-region").value = "all";
             document.getElementById("f-authority").value = "all";
             updateCascading(); render();
         });
@@ -407,7 +420,7 @@ app_js_content = """(function () {
 
     function chartHaredi() {
         kill("haredi");
-        let rows = (state.harediScope === "authorities" ? AUTHORITIES : SETTLEMENTS).filter(x => x.pop_haredim_2023 > 0).map(x => ({ name:x.name, pct:x.haredi_pct, abs:x.pop_haredim_2023 }));
+        let rows = (state.harediScope === "authorities" ? filteredAuthorities() : filtered()).filter(x => x.pop_haredim_2023 > 0).map(x => ({ name:x.name, pct:x.haredi_pct, abs:x.pop_haredim_2023 }));
         const key = state.harediMetric === "pct" ? "pct" : "abs";
         rows = rows.sort((a,b)=>b[key]-a[key]).slice(0,8);
         charts.haredi = new Chart(document.getElementById("chart-haredi"), {
@@ -458,7 +471,7 @@ app_js_content = """(function () {
         const renderAgeChart = (id, key, color, metric) => {
             kill(id);
             const isPct = metric === "pct";
-            let chartRows = AUTHORITIES.filter(r => (r[key]||0) > 0).map(r => {
+            let chartRows = filteredAuthorities().filter(r => (r[key]||0) > 0).map(r => {
                 const totalAge = (r.pop_0_14||0) + (r.pop_15_64||0) + (r.pop_65_plus||0);
                 const pct = totalAge > 0 ? (r[key] / totalAge * 100) : 0;
                 return { name: r.name, abs: r[key], pct: pct };
@@ -478,7 +491,7 @@ app_js_content = """(function () {
 
     function renderDependency() {
         kill("dependency");
-        const rows = AUTHORITIES.filter(r=>r.dependency_ratio!=null && r.dependency_ratio!==0).sort((a,b)=>b.dependency_ratio-a.dependency_ratio);
+        const rows = filteredAuthorities().filter(r=>r.dependency_ratio!=null && r.dependency_ratio!==0).sort((a,b)=>b.dependency_ratio-a.dependency_ratio);
         const mult = state.depMetric === "per100" ? 100 : 1;
         const fmtCb = v => state.depMetric === "per100" ? v.toFixed(1) : v.toFixed(2);
         charts["dependency"] = new Chart(document.getElementById("chart-dependency"), {
@@ -492,11 +505,11 @@ app_js_content = """(function () {
         const q = state.search.trim().toLowerCase();
         let rows, headers;
         if (state.tab === "authorities") {
-            rows = AUTHORITIES.slice(); headers = ["שם","סוג/מעמד","מגזר","דירוג סוציו׳","גידול (%)","אוכלוסייה"];
+            rows = filteredAuthorities().slice(); headers = ["שם","סוג/מעמד","מגזר","דירוג סוציו׳","גידול (%)","אוכלוסייה"];
         } else if (state.tab === "settlements") {
-            rows = SETTLEMENTS.slice(); headers = ["שם","רשות","מגזר","צורת יישוב","אוכלוסייה","% חרדים"];
+            rows = filtered().slice(); headers = ["שם","רשות","מגזר","צורת יישוב","אוכלוסייה","% חרדים"];
         } else {
-            rows = SETTLEMENTS.filter(s=>s.haredi_pct>0).sort((a,b)=>b.haredi_pct-a.haredi_pct); headers = ["שם","רשות","אוכלוסייה","% חרדים"];
+            rows = filtered().filter(s=>s.haredi_pct>0).sort((a,b)=>b.haredi_pct-a.haredi_pct); headers = ["שם","רשות","אוכלוסייה","% חרדים"];
         }
         if (q) rows = rows.filter(r => (r.name||"").toLowerCase().includes(q) || (r.authority||"").toLowerCase().includes(q));
         
@@ -512,20 +525,20 @@ app_js_content = """(function () {
         tbl.innerHTML = head + "<tbody>" + (body || `<tr><td colspan="${headers.length}" class="text-center text-slate-500 py-6">לא נמצאו נתונים</td></tr>`) + "</tbody>";
     }
 
+    function renderAuthCharts() {
+        const auths = filteredAuthorities();
+        makeBarChart("socio", auths, "socio_rank", C.lime, v=>v, {min: 1, max: 10});
+        makeBarChart("growth", auths, "pop_growth", v => v >= 0 ? C.sky : "#ef4444", fmt.pct1);
+        makeBarChart("migration", auths, "migration_balance", v => v >= 0 ? C.gold : "#f97316", fmt.int);
+        makeBarChart("immigrants", auths, "immigrants_1990_pct", C.blue, fmt.pct1);
+    }
+
     function render() {
-        renderKPIs(); chartPyramid(); chartHaredi(); chartTypes(); renderTable(); renderAgeCharts(); renderDependency();
+        renderKPIs(); chartPyramid(); chartHaredi(); chartTypes(); renderTable(); renderAgeCharts(); renderDependency(); renderAuthCharts();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
         initFilters(); render();
-        setTimeout(() => {
-            makeBarChart("socio", AUTHORITIES, "socio_rank", C.lime, v=>v, {min: 1, max: 10});
-            makeBarChart("growth", AUTHORITIES, "pop_growth", v => v >= 0 ? C.sky : "#ef4444", fmt.pct1);
-            makeBarChart("migration", AUTHORITIES, "migration_balance", v => v >= 0 ? C.gold : "#f97316", fmt.int);
-            makeBarChart("immigrants", AUTHORITIES, "immigrants_1990_pct", C.blue, fmt.pct1);
-            renderAgeCharts();
-            renderDependency();
-        }, 100);
     });
 })();
 """
