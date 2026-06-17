@@ -35,8 +35,24 @@ def clean_value(val):
     except: return 0
 
 # 1. Load HTML mapping (for sector)
-with open(os.path.join(directory, 'mapping.json'), 'r', encoding='utf-8') as f:
-    html_mapping = json.load(f)
+html_mapping = {}
+try:
+    with open(os.path.join(directory, 'mapping.json'), 'r', encoding='utf-8') as f:
+        html_mapping = json.load(f)
+except Exception:
+    pass
+
+HARDCODED_SECTORS = {
+    # Eastern
+    487: 'ערבי', 4203: 'דרוזי', 4001: 'דרוזי', 4201: 'דרוזי',
+    4502: 'דרוזי', 962: 'ערבי', 4501: 'ערבי', 546: 'דרוזי', 540: 'ערבי',
+    # Western
+    473: 'ערבי', 480: 'דרוזי', 1292: 'ערבי', 485: 'דרוזי',
+    496: 'דרוזי', 502: 'דרוזי', 1296: 'דרוזי', 507: 'ערבי',
+    517: 'ערבי', 518: 'ערבי', 536: 'דרוזי', 535: 'ערבי',
+    1246: 'ערבי', 658: 'ערבי', 1143: 'לא-יהודי',
+    7600: 'מעורב', 1063: 'מעורב'
+}
 
 # 2. Parse skill markdown for exact settlement types and true authorities
 skill_path = os.path.join(directory, 'docs', 'eshkol_matching_skill.md')
@@ -210,7 +226,9 @@ for idx, row in result_df.iterrows():
     if not name: name = 'לא ידוע'
 
     map_data = html_mapping.get(name, {})
-    sector = map_data.get('sector', 'יהודי')
+    sector = map_data.get('sector')
+    if not sector:
+        sector = HARDCODED_SECTORS.get(semel, 'יהודי')
     
     # Hardcode RC type to fix Double Counting bug
     if semel in rc_code_map.values():
