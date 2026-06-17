@@ -236,8 +236,16 @@ for idx, row in result_df.iterrows():
     else:
         type_gross = eshkol_type_map.get(semel)
         if not type_gross:
-            type_gross = map_data.get('type_gross', 'לא ידוע')
-            if type_gross == 'עירייה': type_gross = 'עירייה / מועצה מקומית'
+            sug = row.get('SemelSugMaamad')
+            if pd.notna(sug):
+                if sug in [1, 2]:
+                    type_gross = 'עירייה / מועצה מקומית'
+                elif sug == 3:
+                    type_gross = 'מועצה אזורית'
+                else:
+                    type_gross = 'לא ידוע'
+            else:
+                type_gross = 'לא ידוע'
     
     authority = eshkol_auth_map.get(semel)
     if not authority:
