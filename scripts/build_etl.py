@@ -103,7 +103,18 @@ detailed_file = os.path.join(directory, '. אוכלוסייה ביישובים �
 dfs_2023 = []
 for sheet in ['יישובים יהודים', 'יישובים לא יהודים', 'יישובים מעורבים']:
     df = pd.read_excel(detailed_file, sheet_name=sheet, header=None, skiprows=12)
-    df = df[[0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]].dropna(subset=[1])
+    
+    if sheet == 'יישובים מעורבים':
+        # Filter for total population group to avoid double counting Jews and Arabs
+        df = df[df[3] == 'סה"כ']
+        # Columns shifted by 1: Col 4 is Gender, Col 5 is Total, Col 6 is 0-4
+        df = df[[0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]].dropna(subset=[1])
+    else:
+        # Col 3 is Gender, Col 4 is Total, Col 5 is 0-4
+        df = df[[0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]].dropna(subset=[1])
+        
+    # Align column names temporarily so they concat cleanly
+    df.columns = [0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
     dfs_2023.append(df)
 
 df_2023_full = pd.concat(dfs_2023)
