@@ -1,4 +1,0 @@
-Total Authorities Verified: 186
-Total Discrepancies Found: 0
-----------------------------------------
-ALL DATA PERFECTLY MATCHES RAW EXCEL SOURCES.

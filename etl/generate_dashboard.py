@@ -4,14 +4,15 @@ import sys
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-directory = r'd:\Users\97252\Desktop\Benny\WORK\מרכז ידע\02-מסדי נתונים\01-רשויות\דמוגרפיה\Demography_Dashboard_Package'
-app_dir = os.path.join(directory, 'app')
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo root
+data_dir = os.path.join(ROOT, 'data')
+app_dir = os.path.join(ROOT, 'dashboard')   # published web app
 
 if not os.path.exists(app_dir):
     os.makedirs(app_dir)
 
 # 1. Load data.json
-with open(os.path.join(directory, 'data.json'), 'r', encoding='utf-8') as f:
+with open(os.path.join(data_dir, 'data.json'), 'r', encoding='utf-8') as f:
     raw_data = json.load(f)
 
 # 2. Split into settlements and regional councils
@@ -42,7 +43,7 @@ html_content = """<!DOCTYPE html>
     <title>דשבורד דמוגרפיה גליל מזרחי ומערבי</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="../design/colors_and_type.css">
+    <link rel="stylesheet" href="assets/colors_and_type.css">
     <style>
         body { background-color: var(--egkc-bg-app); font-family: "Heebo", system-ui, sans-serif; }
         .chart-card { background-color: var(--egkc-surface); border-radius: var(--egkc-radius-lg); box-shadow: var(--egkc-shadow-sm); padding: 20px; }
@@ -67,7 +68,7 @@ html_content = """<!DOCTYPE html>
 <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 w-full">
     <header class="chart-card egkc-border-accent-edge flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-4">
-            <img src="../design/uploads/לוגו מרכז הידע חדש עם גליל מערבי רקע לבן.jpg" alt="לוגו" class="h-16 w-auto">
+            <img src="assets/logo.jpg" alt="לוגו" class="h-16 w-auto">
             <div>
                 <h1 class="egkc-h1" style="color:#183048;">דשבורד דמוגרפיה גליל מזרחי ומערבי</h1>
             </div>
@@ -83,7 +84,7 @@ html_content = """<!DOCTYPE html>
                         <span style="width:8px;height:8px;border-radius:50%;background:var(--egkc-accent);display:inline-block;"></span>
                         דמוגרפיה
                     </h3>
-                    <div><label class="egkc-label block mb-1.5">אזור</label><select id="f-region" class="egkc-select w-full"><option value="all">כלל האשכול</option><option value="מזרחי">גליל מזרחי</option><option value="מערבי">גליל מערבי</option></select></div>
+                    <div><label class="egkc-label block mb-1.5">אזור</label><select id="f-region" class="egkc-select w-full"><option value="all">כלל האשכול</option></select></div>
                     <div><label class="egkc-label block mb-1.5">רשות מוניציפלית</label><select id="f-authority" class="egkc-select w-full"><option value="all">כל הרשויות</option></select></div>
                     <div><label class="egkc-label block mb-1.5">מגזר</label><select id="f-sector" class="egkc-select w-full"><option value="all">כל המגזרים</option></select></div>
                     <div><label class="egkc-label block mb-1.5">צורת יישוב</label><select id="f-type" class="egkc-select w-full"><option value="all">כל הצורות</option></select></div>
@@ -94,11 +95,14 @@ html_content = """<!DOCTYPE html>
                 </aside>
                 <div class="w-full md:w-3/4 flex flex-col">
                     <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
-                        <h4 class="egkc-h3">פירמידת גילים ומגדר</h4>
-                        <span id="pyramid-scope" class="px-2 py-0.5 text-xs rounded-full" style="background:var(--egkc-accent-soft);color:var(--egkc-accent-strong);"></span>
+                        <h4 class="egkc-h3" id="pyramid-title">פירמידת גילים ומגדר</h4>
+                        <div class="flex items-center gap-2">
+                            <div class="seg-toggle" id="age-view"><button data-val="detailed" class="active">מורחב</button><button data-val="condensed">מצומצם</button></div>
+                            <span id="pyramid-scope" class="px-2 py-0.5 text-xs rounded-full" style="background:var(--egkc-accent-soft);color:var(--egkc-accent-strong);"></span>
+                        </div>
                     </div>
                     <div style="position:relative; min-height:360px; flex-grow:1;"><canvas id="chart-pyramid"></canvas></div>
-                    <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - אוכלוסייה ברמת אזור סטטיסטי 2023</p>
+                    <p id="pyramid-source" class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - אוכלוסייה ברמת אזור סטטיסטי 2023 (התפלגות גיל ומגדר מפורטת)</p>
                 </div>
             </div>
         </section>
@@ -155,6 +159,7 @@ html_content = """<!DOCTYPE html>
                         <div class="seg-toggle" id="age-young-metric"><button data-val="pct" class="active">%</button><button data-val="abs">מספר</button></div>
                     </div>
                     <div style="height:260px;position:relative;"><canvas id="chart-age-young"></canvas></div>
+                    <p class="text-[10px] text-slate-400 mt-1 text-center leading-tight">אופן חישוב: אוכלוסיית 0-14 כאחוז מסך האוכלוסייה בעלת נתוני גיל (מקור: למ"ס 2023)</p>
                 </div>
                 <div class="mt-4">
                     <div class="flex justify-between items-center mb-2">
@@ -162,6 +167,7 @@ html_content = """<!DOCTYPE html>
                         <div class="seg-toggle" id="age-work-metric"><button data-val="pct" class="active">%</button><button data-val="abs">מספר</button></div>
                     </div>
                     <div style="height:260px;position:relative;"><canvas id="chart-age-work"></canvas></div>
+                    <p class="text-[10px] text-slate-400 mt-1 text-center leading-tight">אופן חישוב: אוכלוסיית 15-64 כאחוז מסך האוכלוסייה בעלת נתוני גיל (מקור: למ"ס 2023)</p>
                 </div>
                 <!-- Row 4 -->
                 <div class="mt-4">
@@ -170,6 +176,7 @@ html_content = """<!DOCTYPE html>
                         <div class="seg-toggle" id="age-old-metric"><button data-val="pct" class="active">%</button><button data-val="abs">מספר</button></div>
                     </div>
                     <div style="height:260px;position:relative;"><canvas id="chart-age-old"></canvas></div>
+                    <p class="text-[10px] text-slate-400 mt-1 text-center leading-tight">אופן חישוב: אוכלוסיית 65+ כאחוז מסך האוכלוסייה בעלת נתוני גיל (מקור: למ"ס 2023)</p>
                 </div>
                 <div class="mt-4">
                     <div class="flex justify-between items-center mb-2">
@@ -179,6 +186,19 @@ html_content = """<!DOCTYPE html>
                     <div style="height:260px;position:relative;"><canvas id="chart-dependency"></canvas></div>
                     <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - דמוגרפיה 2023</p>
                     <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">אופן חישוב: אוכלוסייה תלויה חלקי אוכלוסייה בגילאי עבודה</p>
+                </div>
+                <!-- Row 5 -->
+                <div class="mt-4">
+                    <h3 class="egkc-h3 mb-2 flex items-center gap-2"><span style="width:6px;height:24px;background:#186078;border-radius:2px;"></span>שיעור פריון כולל (רשויות)</h3>
+                    <div style="height:260px;position:relative;"><canvas id="chart-tfr"></canvas></div>
+                    <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - קובץ רשויות מקומיות 2024</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">מספר ילדים ממוצע לאישה. רמת תחלופה ≈ 2.1. מוצג עבור רשויות שעבורן קיים נתון</p>
+                </div>
+                <div class="mt-4">
+                    <h3 class="egkc-h3 mb-2 flex items-center gap-2"><span style="width:6px;height:24px;background:#c0a860;border-radius:2px;"></span>צפיפות אוכלוסייה (רשויות)</h3>
+                    <div style="height:260px;position:relative;"><canvas id="chart-density"></canvas></div>
+                    <p class="text-xs text-slate-500 mt-2 text-center">מקור: למ"ס - קובץ רשויות מקומיות 2024</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5 text-center leading-tight">תושבים לקמ"ר. מוצג עבור יישובים המונים 5,000 תושבים ויותר</p>
                 </div>
 
             </div>
@@ -202,7 +222,8 @@ html_content = """<!DOCTYPE html>
 
     <footer class="text-center p-6 egkc-footer-attr leading-relaxed">
         המידע עובד על ידי מרכז ידע אזורי גליל מזרחי | מערבי.<br>
-        מקור הנתונים: הלשכה המרכזית לסטטיסטיקה (אומדני אוכלוסייה 2025, ונתוני גילאים/חרדים נכון ל-2023).
+        מקור הנתונים: הלשכה המרכזית לסטטיסטיקה (אומדני אוכלוסייה 2025, ונתוני גילאים/חרדים נכון ל-2023).<br>
+        <span class="text-slate-400" style="font-size:11px;">הערה מתודולוגית: נתונים מסוימים הושמטו מהספירה הכוללת עקב חסיון סטטיסטי של הלמ"ס (ערכים הקטנים או שווים ל-3 תושבים). נתוני האוכלוסייה הכוללת מעודכנים לסוף 2025 (אומדן ארעי); פילוחי גיל, מגדר, יחס תלות וחרדים מבוססים על נתוני סוף 2023; מדד "ילדים ונוער 0-18" והתצוגה המצומצמת מבוססים על מרשם האוכלוסין (בסיס מדידה רחב יותר מאומדני האוכלוסייה ולכן אינו בר-השוואה ישירה); פריון, שטח וצפיפות מתוך קובץ הרשויות המקומיות 2024.</span>
     </footer>
 </div>
 
@@ -256,8 +277,11 @@ app_js_content = """(function () {
     const state = {
         region: "all", authority: "all", sector: "all", type: "all", settlement: "all",
         search: "", tab: "authorities", harediScope: "authorities", harediMetric: "pct", depMetric: "ratio",
-        ageYoungMetric: "pct", ageWorkMetric: "pct", ageOldMetric: "pct"
+        ageYoungMetric: "pct", ageWorkMetric: "pct", ageOldMetric: "pct", ageView: "detailed"
     };
+    // Registry life-stage bands (condensed view), youngest first
+    const REG_BANDS = ["0-5","6-18","19-45","46-55","56-64","65+"];
+    const REG_BAND_LABELS = { "0-5":"גיל הרך (0-5)","6-18":"בית ספר (6-18)","19-45":"צעירים (19-45)","46-55":"ביניים (46-55)","56-64":"טרום פרישה (56-64)","65+":"ותיקים (65+)" };
 
     const fmt = {
         int: v => (v==null||isNaN(v)) ? "—" : Math.round(v).toLocaleString("he-IL"),
@@ -280,7 +304,13 @@ app_js_content = """(function () {
 
     function initFilters() {
         const fill = (id, items, allLabel) => document.getElementById(id).innerHTML = `<option value="all">${allLabel}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join("");
-        
+
+        // Region options come from the data, not a hardcoded list — a new cluster
+        // appears automatically once its rows are added to the config table.
+        const regions = [...new Set(SETTLEMENTS.concat(RCS).map(s => s.region).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"he"));
+        fill("f-region", regions, "כלל האשכול");
+        document.getElementById("f-region").value = state.region;
+
         const updateCascading = () => {
             const regPool = SETTLEMENTS.filter(s => state.region === "all" || s.region === state.region);
             
@@ -348,6 +378,7 @@ app_js_content = """(function () {
         bindToggle("haredi-scope", v => { state.harediScope = v; chartHaredi(); });
         bindToggle("haredi-metric", v => { state.harediMetric = v; chartHaredi(); });
         bindToggle("dep-metric", v => { state.depMetric = v; renderDependency(); });
+        bindToggle("age-view", v => { state.ageView = v; chartPyramid(); });
         bindToggle("age-young-metric", v => { state.ageYoungMetric = v; renderAgeCharts(); });
         bindToggle("age-work-metric", v => { state.ageWorkMetric = v; renderAgeCharts(); });
         bindToggle("age-old-metric", v => { state.ageOldMetric = v; renderAgeCharts(); });
@@ -366,9 +397,15 @@ app_js_content = """(function () {
         const pct1564 = knownAgesPop ? (sum1564 / knownAgesPop * 100) : 0;
         const pct65p = knownAgesPop ? (sum65p / knownAgesPop * 100) : 0;
 
+        // 0-18 from the population registry (0-5 + 6-18). Separate basis -> labelled מרשם.
+        const sum018 = rows.reduce((a,s)=>a+(s.reg_0_18||0),0);
+        const sumRegTot = rows.reduce((a,s)=>a+(s.reg_total||0),0);
+        const pct018 = sumRegTot ? (sum018 / sumRegTot * 100) : 0;
+
         document.getElementById("kpi-row").innerHTML = `
             <div class="egkc-kpi-card egkc-kpi-tinted"><div class="egkc-kpi-numeral">${fmt.int(totalPop)}</div><div class="egkc-kpi-label">סה״כ אוכלוסייה</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#475569;">${fmt.int(count)}</div><div class="egkc-kpi-label">יישובים</div></div>
+            <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#903078;">${fmt.pct1(pct018)}</div><div class="egkc-kpi-label">ילדים ונוער 0-18 &bull; ${fmt.int(sum018)}<br><span style="font-size:9px;opacity:.7;">מרשם אוכלוסין</span></div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#18a8c0;">${fmt.pct1(pct014)}</div><div class="egkc-kpi-label">צעירים (0-14) &bull; ${fmt.int(sum014)}</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#90c048;">${fmt.pct1(pct1564)}</div><div class="egkc-kpi-label">עבודה (15-64) &bull; ${fmt.int(sum1564)}</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#c0a860;">${fmt.pct1(pct65p)}</div><div class="egkc-kpi-label">ותיקים (65+) &bull; ${fmt.int(sum65p)}</div></div>
@@ -386,9 +423,19 @@ app_js_content = """(function () {
     const charts = {};
     const kill = n => { if (charts[n]) { charts[n].destroy(); delete charts[n]; } };
 
+    function setPyramidChrome() {
+        const detailed = state.ageView === "detailed";
+        document.getElementById("pyramid-title").textContent = detailed ? "פירמידת גילים ומגדר" : "התפלגות לפי קבוצות גיל (מורחב/מצומצם)";
+        document.getElementById("pyramid-source").textContent = detailed
+            ? 'מקור: למ"ס - אוכלוסייה ברמת אזור סטטיסטי 2023 (התפלגות גיל ומגדר מפורטת)'
+            : 'מקור: מרשם אוכלוסין, למ"ס (קבוצות גיל מצומצמות; בסיס מדידה שונה מאומדני האוכלוסייה)';
+    }
+
     function chartPyramid() {
         kill("pyramid");
+        setPyramidChrome();
         const rows = filtered();
+        if (state.ageView === "condensed") { return chartLifeStages(rows); }
         // Since AGES is reversed, we reverse the data arrays as well
         const m = AGES.map((_,i)=>{
             const origIndex = D.ageLabels.length - 1 - i;
@@ -415,6 +462,20 @@ app_js_content = """(function () {
                 },
                 plugins:{ legend:{ position:"bottom", labels:{ font:FONT } }, tooltip:{ callbacks:{ label:c=>`${c.dataset.label}: ${fmt.int(Math.abs(c.parsed.x))}` } } }
             }
+        });
+    }
+
+    function chartLifeStages(rows) {
+        const order = REG_BANDS.slice().reverse(); // 65+ at top, 0-5 at bottom
+        const labels = order.map(b=>REG_BAND_LABELS[b]);
+        const data = order.map(b=>rows.reduce((a,s)=>a+((s.reg_bands&&s.reg_bands[b])||0),0));
+        charts.pyramid = new Chart(document.getElementById("chart-pyramid"), {
+            type:"bar",
+            data:{ labels, datasets:[{ label:"תושבים (מרשם)", data, backgroundColor:C.accent, borderRadius:3 }] },
+            options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false,
+                scales:{ x:{ ticks:{ font:FONT, color:"#94a3b8", callback:v=>fmt.int(v) }, grid:{ color:"#f1f5f9" } },
+                         y:{ ticks:{ font:FONT, color:"#475569" }, grid:{ display:false } } },
+                plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:c=>fmt.int(c.parsed.x) } } } }
         });
     }
 
@@ -505,7 +566,7 @@ app_js_content = """(function () {
         const q = state.search.trim().toLowerCase();
         let rows, headers;
         if (state.tab === "authorities") {
-            rows = filteredAuthorities().slice(); headers = ["שם","סוג/מעמד","מגזר","דירוג סוציו׳","גידול (%)","אוכלוסייה"];
+            rows = filteredAuthorities().slice(); headers = ["שם","סוג/מעמד","מגזר","דירוג סוציו׳","שטח (קמ״ר)","גידול (%)","אוכלוסייה"];
         } else if (state.tab === "settlements") {
             rows = filtered().slice(); headers = ["שם","רשות","מגזר","צורת יישוב","אוכלוסייה","% חרדים"];
         } else {
@@ -516,7 +577,7 @@ app_js_content = """(function () {
         const head = `<thead><tr>${headers.map((h,i)=>`<th class="${i===0?'':'text-center'}">${h}</th>`).join("")}</tr></thead>`;
         let body;
         if (state.tab === "authorities") {
-            body = rows.map(r=>`<tr><td class="font-semibold">${r.name}</td><td class="text-center">${r.type_gross}</td><td class="text-center">${r.sector||"—"}</td><td class="text-center">${r.socio_rank||"—"}</td><td class="text-center">${fmt.pct1(r.pop_growth)}</td><td class="text-center">${fmt.int(r.population)}</td></tr>`).join("");
+            body = rows.map(r=>`<tr><td class="font-semibold">${r.name}</td><td class="text-center">${r.type_gross}</td><td class="text-center">${r.sector||"—"}</td><td class="text-center">${r.socio_rank||"—"}</td><td class="text-center">${r.area_sqkm!=null?r.area_sqkm.toFixed(1):"—"}</td><td class="text-center">${fmt.pct1(r.pop_growth)}</td><td class="text-center">${fmt.int(r.population)}</td></tr>`).join("");
         } else if (state.tab === "settlements") {
             body = rows.map(r=>`<tr><td class="font-semibold">${r.name}</td><td class="text-center">${r.authority}</td><td class="text-center">${r.sector}</td><td class="text-center">${r.type_gross}</td><td class="text-center">${fmt.int(r.population)}</td><td class="text-center">${r.haredi_pct?fmt.pct1(r.haredi_pct):"—"}</td></tr>`).join("");
         } else {
@@ -528,9 +589,12 @@ app_js_content = """(function () {
     function renderAuthCharts() {
         const auths = filteredAuthorities();
         makeBarChart("socio", auths, "socio_rank", C.lime, v=>v, {min: 1, max: 10});
-        makeBarChart("growth", auths, "pop_growth", v => v >= 0 ? C.sky : "#ef4444", fmt.pct1);
-        makeBarChart("migration", auths, "migration_balance", v => v >= 0 ? C.gold : "#f97316", fmt.int);
+        // Brand rule: no red. Magenta carries the negative axis (skill §4).
+        makeBarChart("growth", auths, "pop_growth", v => v >= 0 ? C.sky : C.magenta, fmt.pct1);
+        makeBarChart("migration", auths, "migration_balance", v => v >= 0 ? C.gold : C.magenta, fmt.int);
         makeBarChart("immigrants", auths, "immigrants_1990_pct", C.blue, fmt.pct1);
+        makeBarChart("tfr", auths, "tfr", "#186078", v=>v.toFixed(2));
+        makeBarChart("density", auths, "density", C.gold, v=>fmt.int(v));
     }
 
     function render() {

@@ -1,0 +1,327 @@
+/* ============================================================
+   Eastern Galilee Knowledge Center — Colors & Type
+   ============================================================
+   Import this stylesheet in every artifact:
+       <link rel="stylesheet" href="colors_and_type.css">
+
+   It declares:
+     1. Heebo font loading (Google Fonts CDN — falls back to
+        ./fonts/ if the woff2 files are present).
+     2. Base color tokens.
+     3. Per-dashboard accent system.
+     4. Semantic typography classes.
+     5. Format-name → CSS utility classes that mirror the
+        runtime's FORMATTERS object (so static mocks read the
+        same as live dashboards).
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap");
+
+/* If the woff2 files are present locally (./fonts/), prefer them.
+   The @font-face rules below are commented out by default; uncomment
+   and place files into ./fonts/ for offline / print exports.
+
+@font-face {
+    font-family: "Heebo";
+    src: url("./fonts/Heebo-Light.woff2")    format("woff2");
+    font-weight: 300; font-display: swap;
+}
+@font-face {
+    font-family: "Heebo";
+    src: url("./fonts/Heebo-Regular.woff2")  format("woff2");
+    font-weight: 400; font-display: swap;
+}
+@font-face {
+    font-family: "Heebo";
+    src: url("./fonts/Heebo-Medium.woff2")   format("woff2");
+    font-weight: 500; font-display: swap;
+}
+@font-face {
+    font-family: "Heebo";
+    src: url("./fonts/Heebo-Bold.woff2")     format("woff2");
+    font-weight: 700; font-display: swap;
+}
+@font-face {
+    font-family: "Heebo";
+    src: url("./fonts/Heebo-Black.woff2")    format("woff2");
+    font-weight: 900; font-display: swap;
+}
+*/
+
+/* ----------------------------------------------------------------
+   1. BASE TOKENS — neutral palette + chart palettes
+   ---------------------------------------------------------------- */
+:root {
+    /* Surfaces */
+    --egkc-bg-app:        #f8fafc; /* slate-50  — page background  */
+    --egkc-surface:       #ffffff; /* white     — every card       */
+    --egkc-surface-alt:   #fafafa; /* table stripe                 */
+
+    /* Foreground */
+    --egkc-fg-strong:     #1e293b; /* slate-800 — body & KPI nums  */
+    --egkc-fg:            #334155; /* slate-700 — labels, headings */
+    --egkc-fg-muted:      #64748b; /* slate-500 — subtitle/caveat  */
+    --egkc-fg-faint:      #94a3b8; /* slate-400 — footer attr      */
+
+    /* Lines */
+    --egkc-divider:       #f1f5f9; /* slate-100                    */
+    --egkc-border:        #e2e8f0; /* slate-200 — inputs, cells    */
+    --egkc-scrollbar:     #cbd5e1; /* slate-300                    */
+
+    /* ──── BRAND PALETTE (from the mosaic logo) ──── */
+    --egkc-navy:          #183048; /* deepest mosaic tile + ALL text in the wordmark */
+    --egkc-cyan:          #18a8c0; /* dominant mosaic tile — primary brand identity */
+    --egkc-cyan-deep:     #186078; /* mid-deep teal                                 */
+    --egkc-blue:          #1878a8; /* secondary mosaic blue                         */
+    --egkc-sky:           #48c0f0; /* bright sky-blue mosaic tile                   */
+    --egkc-sky-soft:      #78c0f0; /* pale sky tile                                 */
+    --egkc-lime:          #90c048; /* mosaic green                                  */
+    --egkc-gold:          #c0a860; /* mosaic gold/tan                               */
+    --egkc-magenta:       #903078; /* mosaic plum/magenta                           */
+
+    /* Accent (per-dashboard; default = brand cyan) */
+    --egkc-accent:        var(--egkc-cyan);
+    --egkc-accent-soft:   #e6f6f9;  /* cyan tint for KPI surfaces */
+    --egkc-accent-strong: var(--egkc-cyan-deep);
+
+    /* Semantic */
+    --egkc-positive:      #10b981; /* emerald-500 */
+    --egkc-warning:       #f59e0b; /* amber-500   */
+    --egkc-negative:      #ef4444; /* red-500     */
+
+    /* Chart palette — qualitative (≤10 hues). Pulled directly
+       from the mosaic logo so charts feel native to the brand. */
+    --egkc-q-1:  #18a8c0; /* brand cyan      */
+    --egkc-q-2:  #903078; /* magenta         */
+    --egkc-q-3:  #1878a8; /* blue            */
+    --egkc-q-4:  #90c048; /* lime            */
+    --egkc-q-5:  #c0a860; /* gold            */
+    --egkc-q-6:  #183048; /* navy            */
+    --egkc-q-7:  #48c0f0; /* sky             */
+    --egkc-q-8:  #186078; /* deep teal       */
+    --egkc-q-9:  #78c0f0; /* sky soft        */
+    --egkc-q-10: #d77b3a; /* warm accent (added — needed a 10th, distinct from gold) */
+
+    /* Chart palette — sequential (light → dark cyan, brand-native) */
+    --egkc-s-1: #e6f6f9;
+    --egkc-s-2: #c8eaf1;
+    --egkc-s-3: #a0dbe7;
+    --egkc-s-4: #78cad9;
+    --egkc-s-5: #4ab7ca;
+    --egkc-s-6: #18a8c0;
+    --egkc-s-7: #1888a0;
+    --egkc-s-8: #186078;
+    --egkc-s-9: #183048;
+
+    /* Chart palette — diverging (negative → neutral → positive) */
+    --egkc-d-1: #b91c1c;
+    --egkc-d-2: #ef4444;
+    --egkc-d-3: #fca5a5;
+    --egkc-d-4: #e5e7eb;
+    --egkc-d-5: #93c5fd;
+    --egkc-d-6: #3b82f6;
+    --egkc-d-7: #1e40af;
+
+    /* Type scale — tracks Tailwind's defaults */
+    --egkc-text-xs:   12px;
+    --egkc-text-sm:   14px;
+    --egkc-text-base: 16px;
+    --egkc-text-lg:   18px;
+    --egkc-text-xl:   20px;
+    --egkc-text-2xl:  24px;
+    --egkc-text-3xl:  30px;
+    --egkc-text-4xl:  36px;
+
+    /* Radii */
+    --egkc-radius-sm:  4px;   /* inputs, scrollbars */
+    --egkc-radius-md:  8px;   /* KPI cards          */
+    --egkc-radius-lg:  12px;  /* every other card   */
+
+    /* Shadows */
+    --egkc-shadow-sm:   0 1px 2px 0 rgba(0,0,0,0.05);
+    --egkc-shadow-lift: 0 10px 20px rgba(0,0,0,0.05);
+
+    /* Motion */
+    --egkc-ease:      cubic-bezier(0.4, 0, 0.2, 1);
+    --egkc-dur-fast:  150ms;
+    --egkc-dur-base:  200ms;
+}
+
+/* ----------------------------------------------------------------
+   2. ACCENT VARIANTS — drop one class on <body> to retheme.
+   All accents are pulled from the mosaic logo so dashboards stay
+   in the brand family regardless of topic.
+   ---------------------------------------------------------------- */
+.egkc-accent-cyan    { --egkc-accent: #18a8c0; --egkc-accent-soft: #e6f6f9; --egkc-accent-strong: #186078; } /* default · data / general    */
+.egkc-accent-navy    { --egkc-accent: #183048; --egkc-accent-soft: #e3eaf2; --egkc-accent-strong: #0a1828; } /* policy / governance         */
+.egkc-accent-blue    { --egkc-accent: #1878a8; --egkc-accent-soft: #e1eff7; --egkc-accent-strong: #135a82; } /* education / demographic     */
+.egkc-accent-lime    { --egkc-accent: #90c048; --egkc-accent-soft: #f0f7e3; --egkc-accent-strong: #6b9132; } /* environment / agriculture   */
+.egkc-accent-gold    { --egkc-accent: #c0a860; --egkc-accent-soft: #f7f2e3; --egkc-accent-strong: #927d3f; } /* tourism / economic          */
+.egkc-accent-magenta { --egkc-accent: #903078; --egkc-accent-soft: #f4e1ee; --egkc-accent-strong: #6b1f5a; } /* equity / welfare / sensitive */
+
+/* ----------------------------------------------------------------
+   3. BASE — page-level defaults
+   ---------------------------------------------------------------- */
+html { font-family: "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif; }
+body {
+    font-family: "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background-color: var(--egkc-bg-app);
+    color: var(--egkc-fg-strong);
+    font-size: var(--egkc-text-sm);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ----------------------------------------------------------------
+   4. SEMANTIC TYPOGRAPHY — drop these on any element directly
+   ---------------------------------------------------------------- */
+.egkc-h1 {
+    font-size: var(--egkc-text-3xl);
+    font-weight: 900;
+    color: var(--egkc-fg-strong);
+    line-height: 1.2;
+}
+.egkc-h2 {
+    font-size: var(--egkc-text-lg);
+    font-weight: 700;
+    color: var(--egkc-fg);
+    line-height: 1.3;
+}
+.egkc-h3 {
+    font-size: var(--egkc-text-base);
+    font-weight: 700;
+    color: var(--egkc-fg);
+    line-height: 1.4;
+}
+.egkc-subtitle {
+    font-size: var(--egkc-text-base);
+    font-weight: 400;
+    color: var(--egkc-fg-muted);
+    line-height: 1.5;
+}
+.egkc-label {
+    font-size: var(--egkc-text-sm);
+    font-weight: 500;
+    color: var(--egkc-fg);
+}
+.egkc-body {
+    font-size: var(--egkc-text-sm);
+    font-weight: 400;
+    color: var(--egkc-fg-strong);
+}
+.egkc-caveat,
+.egkc-footnote {
+    font-size: var(--egkc-text-xs);
+    font-weight: 400;
+    color: var(--egkc-fg-muted);
+    line-height: 1.5;
+}
+.egkc-footer-attr {
+    font-size: var(--egkc-text-xs);
+    font-weight: 400;
+    color: var(--egkc-fg-faint);
+}
+.egkc-kpi-numeral {
+    font-size: var(--egkc-text-3xl);
+    font-weight: 700;
+    color: var(--egkc-accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+.egkc-kpi-label {
+    font-size: var(--egkc-text-xs);
+    font-weight: 500;
+    color: var(--egkc-fg-muted);
+    text-transform: none; /* never uppercase Hebrew */
+}
+
+/* Tabular nums on anything that displays numbers in a column */
+.egkc-num,
+table.egkc-data-table td {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------
+   5. SURFACES & ELEVATION
+   ---------------------------------------------------------------- */
+.egkc-card {
+    background: var(--egkc-surface);
+    border-radius: var(--egkc-radius-lg);
+    box-shadow: var(--egkc-shadow-sm);
+    padding: 24px;
+}
+.egkc-card-hover { transition: transform var(--egkc-dur-base) var(--egkc-ease), box-shadow var(--egkc-dur-base) var(--egkc-ease); }
+.egkc-card-hover:hover { transform: translateY(-2px); box-shadow: var(--egkc-shadow-lift); }
+.egkc-kpi-card {
+    background: var(--egkc-surface);
+    border-radius: var(--egkc-radius-md);
+    padding: 16px;
+    min-width: 140px;
+    text-align: center;
+    box-shadow: var(--egkc-shadow-sm);
+}
+.egkc-kpi-card.egkc-kpi-tinted {
+    background: var(--egkc-accent-soft);
+}
+
+/* Header's distinctive 4px accent edge (RTL-aware) */
+[dir="rtl"] .egkc-border-accent-edge { border-right: 4px solid var(--egkc-accent); }
+[dir="ltr"] .egkc-border-accent-edge { border-left: 4px solid var(--egkc-accent); }
+
+/* ----------------------------------------------------------------
+   6. CONTROLS — tab, link, input
+   ---------------------------------------------------------------- */
+.egkc-tab-inactive { color: var(--egkc-fg-muted); padding-bottom: 4px; font-weight: 500; transition: color var(--egkc-dur-fast) var(--egkc-ease); }
+.egkc-tab-inactive:hover { color: var(--egkc-fg); }
+.egkc-tab-active   { color: var(--egkc-accent); border-bottom: 2px solid var(--egkc-accent); padding-bottom: 4px; font-weight: 700; }
+
+.egkc-link-accent { color: var(--egkc-accent); font-size: var(--egkc-text-xs); cursor: pointer; }
+.egkc-link-accent:hover { text-decoration: underline; }
+
+.egkc-input,
+.egkc-select {
+    border: 1px solid var(--egkc-border);
+    border-radius: var(--egkc-radius-sm);
+    padding: 6px 12px;
+    font-size: var(--egkc-text-sm);
+    font-family: inherit;
+    background: var(--egkc-surface);
+    color: var(--egkc-fg-strong);
+    direction: inherit;
+    outline: none;
+    transition: border-color var(--egkc-dur-fast) var(--egkc-ease);
+}
+.egkc-input:focus,
+.egkc-select:focus { border-color: var(--egkc-fg-faint); }
+
+/* ----------------------------------------------------------------
+   7. DATA TABLE
+   ---------------------------------------------------------------- */
+table.egkc-data-table { width: 100%; border-collapse: collapse; font-size: var(--egkc-text-sm); }
+table.egkc-data-table thead th {
+    position: sticky; top: 0;
+    background: var(--egkc-bg-app);
+    color: var(--egkc-fg);
+    font-weight: 600;
+    text-align: right;
+    padding: 8px 12px;
+}
+table.egkc-data-table tbody tr { border-top: 1px solid var(--egkc-divider); }
+table.egkc-data-table tbody tr:hover { background: var(--egkc-bg-app); }
+table.egkc-data-table td { padding: 8px 12px; }
+
+.egkc-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.egkc-scrollbar::-webkit-scrollbar-thumb { background: var(--egkc-scrollbar); border-radius: var(--egkc-radius-sm); }
+.egkc-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--egkc-fg-faint); }
+
+/* ----------------------------------------------------------------
+   8. FORMATTER UTILITIES — mirror runtime.js FORMATTERS
+   These exist so static mocks read identically to live output.
+   Pair with the JS in runtime.js (window.dashboard.format).
+   ---------------------------------------------------------------- */
+.egkc-fmt-int-comma,
+.egkc-fmt-num-comma,
+.egkc-fmt-pct1,
+.egkc-fmt-pct0,
+.egkc-fmt-currency-ils { font-variant-numeric: tabular-nums; }

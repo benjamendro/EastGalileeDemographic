@@ -18,8 +18,11 @@
     const state = {
         region: "all", authority: "all", sector: "all", type: "all", settlement: "all",
         search: "", tab: "authorities", harediScope: "authorities", harediMetric: "pct", depMetric: "ratio",
-        ageYoungMetric: "pct", ageWorkMetric: "pct", ageOldMetric: "pct"
+        ageYoungMetric: "pct", ageWorkMetric: "pct", ageOldMetric: "pct", ageView: "detailed"
     };
+    // Registry life-stage bands (condensed view), youngest first
+    const REG_BANDS = ["0-5","6-18","19-45","46-55","56-64","65+"];
+    const REG_BAND_LABELS = { "0-5":"גיל הרך (0-5)","6-18":"בית ספר (6-18)","19-45":"צעירים (19-45)","46-55":"ביניים (46-55)","56-64":"טרום פרישה (56-64)","65+":"ותיקים (65+)" };
 
     const fmt = {
         int: v => (v==null||isNaN(v)) ? "—" : Math.round(v).toLocaleString("he-IL"),
@@ -42,7 +45,13 @@
 
     function initFilters() {
         const fill = (id, items, allLabel) => document.getElementById(id).innerHTML = `<option value="all">${allLabel}</option>` + items.map(i => `<option value="${i}">${i}</option>`).join("");
-        
+
+        // Region options come from the data, not a hardcoded list — a new cluster
+        // appears automatically once its rows are added to the config table.
+        const regions = [...new Set(SETTLEMENTS.concat(RCS).map(s => s.region).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"he"));
+        fill("f-region", regions, "כלל האשכול");
+        document.getElementById("f-region").value = state.region;
+
         const updateCascading = () => {
             const regPool = SETTLEMENTS.filter(s => state.region === "all" || s.region === state.region);
             
@@ -110,6 +119,7 @@
         bindToggle("haredi-scope", v => { state.harediScope = v; chartHaredi(); });
         bindToggle("haredi-metric", v => { state.harediMetric = v; chartHaredi(); });
         bindToggle("dep-metric", v => { state.depMetric = v; renderDependency(); });
+        bindToggle("age-view", v => { state.ageView = v; chartPyramid(); });
         bindToggle("age-young-metric", v => { state.ageYoungMetric = v; renderAgeCharts(); });
         bindToggle("age-work-metric", v => { state.ageWorkMetric = v; renderAgeCharts(); });
         bindToggle("age-old-metric", v => { state.ageOldMetric = v; renderAgeCharts(); });
@@ -128,9 +138,15 @@
         const pct1564 = knownAgesPop ? (sum1564 / knownAgesPop * 100) : 0;
         const pct65p = knownAgesPop ? (sum65p / knownAgesPop * 100) : 0;
 
+        // 0-18 from the population registry (0-5 + 6-18). Separate basis -> labelled מרשם.
+        const sum018 = rows.reduce((a,s)=>a+(s.reg_0_18||0),0);
+        const sumRegTot = rows.reduce((a,s)=>a+(s.reg_total||0),0);
+        const pct018 = sumRegTot ? (sum018 / sumRegTot * 100) : 0;
+
         document.getElementById("kpi-row").innerHTML = `
             <div class="egkc-kpi-card egkc-kpi-tinted"><div class="egkc-kpi-numeral">${fmt.int(totalPop)}</div><div class="egkc-kpi-label">סה״כ אוכלוסייה</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#475569;">${fmt.int(count)}</div><div class="egkc-kpi-label">יישובים</div></div>
+            <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#903078;">${fmt.pct1(pct018)}</div><div class="egkc-kpi-label">ילדים ונוער 0-18 &bull; ${fmt.int(sum018)}<br><span style="font-size:9px;opacity:.7;">מרשם אוכלוסין</span></div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#18a8c0;">${fmt.pct1(pct014)}</div><div class="egkc-kpi-label">צעירים (0-14) &bull; ${fmt.int(sum014)}</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#90c048;">${fmt.pct1(pct1564)}</div><div class="egkc-kpi-label">עבודה (15-64) &bull; ${fmt.int(sum1564)}</div></div>
             <div class="egkc-kpi-card"><div class="egkc-kpi-numeral" style="color:#c0a860;">${fmt.pct1(pct65p)}</div><div class="egkc-kpi-label">ותיקים (65+) &bull; ${fmt.int(sum65p)}</div></div>
@@ -148,9 +164,19 @@
     const charts = {};
     const kill = n => { if (charts[n]) { charts[n].destroy(); delete charts[n]; } };
 
+    function setPyramidChrome() {
+        const detailed = state.ageView === "detailed";
+        document.getElementById("pyramid-title").textContent = detailed ? "פירמידת גילים ומגדר" : "התפלגות לפי קבוצות גיל (מורחב/מצומצם)";
+        document.getElementById("pyramid-source").textContent = detailed
+            ? 'מקור: למ"ס - אוכלוסייה ברמת אזור סטטיסטי 2023 (התפלגות גיל ומגדר מפורטת)'
+            : 'מקור: מרשם אוכלוסין, למ"ס (קבוצות גיל מצומצמות; בסיס מדידה שונה מאומדני האוכלוסייה)';
+    }
+
     function chartPyramid() {
         kill("pyramid");
+        setPyramidChrome();
         const rows = filtered();
+        if (state.ageView === "condensed") { return chartLifeStages(rows); }
         // Since AGES is reversed, we reverse the data arrays as well
         const m = AGES.map((_,i)=>{
             const origIndex = D.ageLabels.length - 1 - i;
@@ -177,6 +203,20 @@
                 },
                 plugins:{ legend:{ position:"bottom", labels:{ font:FONT } }, tooltip:{ callbacks:{ label:c=>`${c.dataset.label}: ${fmt.int(Math.abs(c.parsed.x))}` } } }
             }
+        });
+    }
+
+    function chartLifeStages(rows) {
+        const order = REG_BANDS.slice().reverse(); // 65+ at top, 0-5 at bottom
+        const labels = order.map(b=>REG_BAND_LABELS[b]);
+        const data = order.map(b=>rows.reduce((a,s)=>a+((s.reg_bands&&s.reg_bands[b])||0),0));
+        charts.pyramid = new Chart(document.getElementById("chart-pyramid"), {
+            type:"bar",
+            data:{ labels, datasets:[{ label:"תושבים (מרשם)", data, backgroundColor:C.accent, borderRadius:3 }] },
+            options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false,
+                scales:{ x:{ ticks:{ font:FONT, color:"#94a3b8", callback:v=>fmt.int(v) }, grid:{ color:"#f1f5f9" } },
+                         y:{ ticks:{ font:FONT, color:"#475569" }, grid:{ display:false } } },
+                plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:c=>fmt.int(c.parsed.x) } } } }
         });
     }
 
@@ -267,7 +307,7 @@
         const q = state.search.trim().toLowerCase();
         let rows, headers;
         if (state.tab === "authorities") {
-            rows = filteredAuthorities().slice(); headers = ["שם","סוג/מעמד","מגזר","דירוג סוציו׳","גידול (%)","אוכלוסייה"];
+            rows = filteredAuthorities().slice(); headers = ["שם","סוג/מעמד","מגזר","דירוג סוציו׳","שטח (קמ״ר)","גידול (%)","אוכלוסייה"];
         } else if (state.tab === "settlements") {
             rows = filtered().slice(); headers = ["שם","רשות","מגזר","צורת יישוב","אוכלוסייה","% חרדים"];
         } else {
@@ -278,7 +318,7 @@
         const head = `<thead><tr>${headers.map((h,i)=>`<th class="${i===0?'':'text-center'}">${h}</th>`).join("")}</tr></thead>`;
         let body;
         if (state.tab === "authorities") {
-            body = rows.map(r=>`<tr><td class="font-semibold">${r.name}</td><td class="text-center">${r.type_gross}</td><td class="text-center">${r.sector||"—"}</td><td class="text-center">${r.socio_rank||"—"}</td><td class="text-center">${fmt.pct1(r.pop_growth)}</td><td class="text-center">${fmt.int(r.population)}</td></tr>`).join("");
+            body = rows.map(r=>`<tr><td class="font-semibold">${r.name}</td><td class="text-center">${r.type_gross}</td><td class="text-center">${r.sector||"—"}</td><td class="text-center">${r.socio_rank||"—"}</td><td class="text-center">${r.area_sqkm!=null?r.area_sqkm.toFixed(1):"—"}</td><td class="text-center">${fmt.pct1(r.pop_growth)}</td><td class="text-center">${fmt.int(r.population)}</td></tr>`).join("");
         } else if (state.tab === "settlements") {
             body = rows.map(r=>`<tr><td class="font-semibold">${r.name}</td><td class="text-center">${r.authority}</td><td class="text-center">${r.sector}</td><td class="text-center">${r.type_gross}</td><td class="text-center">${fmt.int(r.population)}</td><td class="text-center">${r.haredi_pct?fmt.pct1(r.haredi_pct):"—"}</td></tr>`).join("");
         } else {
@@ -290,9 +330,12 @@
     function renderAuthCharts() {
         const auths = filteredAuthorities();
         makeBarChart("socio", auths, "socio_rank", C.lime, v=>v, {min: 1, max: 10});
-        makeBarChart("growth", auths, "pop_growth", v => v >= 0 ? C.sky : "#ef4444", fmt.pct1);
-        makeBarChart("migration", auths, "migration_balance", v => v >= 0 ? C.gold : "#f97316", fmt.int);
+        // Brand rule: no red. Magenta carries the negative axis (skill §4).
+        makeBarChart("growth", auths, "pop_growth", v => v >= 0 ? C.sky : C.magenta, fmt.pct1);
+        makeBarChart("migration", auths, "migration_balance", v => v >= 0 ? C.gold : C.magenta, fmt.int);
         makeBarChart("immigrants", auths, "immigrants_1990_pct", C.blue, fmt.pct1);
+        makeBarChart("tfr", auths, "tfr", "#186078", v=>v.toFixed(2));
+        makeBarChart("density", auths, "density", C.gold, v=>fmt.int(v));
     }
 
     function render() {

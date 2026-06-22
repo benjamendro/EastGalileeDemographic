@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Excel/Office lock & temp files
+~$*
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Local preview launch config (machine-specific)
+.claude/launch.json
+
+# Archived debug/QA scripts (kept locally, not published)
+_archive/
+
+# Regression baseline & unused legacy mapping (local only)
+data/data.baseline.json
+data/legacy_mapping.json
